@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion",
+    "type": "addin",
+    "id": "8f7d4a3e-5b21-4c8e-9a61-3e2f0b7c1d95",
+    "author": "NewFusionExtension",
+    "description": {
+        "": "Watches an order dropbox, drives parametric models + drawings, exports PDFs. Monitor at http://127.0.0.1:8765"
+    },
+    "version": "0.1.0",
+    "runOnStartup": true,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

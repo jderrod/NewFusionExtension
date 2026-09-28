@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+
+# Runtime data (created by the add-in / harness; contains order data)
+dropbox/
+output/
+machine_drops/
+network_mirror/
+logs/
+state/
+
+# Backups written by the dashboard (toolpath tables reset, etc.)
+*.bak
+config/toolpath_profiles.json
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

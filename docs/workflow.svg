@@ -1,0 +1,328 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="2112" viewBox="0 0 1280 2112" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <title>NewFusionExtension per-component workflow</title>
+  <desc>Steps of Engine._component_steps and _after_component in nfe/engine.py: open model, apply parameters, save model, drilling, toolpath selection, manufacture workspace, generate, post, splice, open drawing, update drawing, export PDF, optional drawing save, then cleanup, with waits, timeouts and the failure path.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5551"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c53030"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2f855a"/>
+    </marker>
+    <marker id="arrTeal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f6f7a"/>
+    </marker>
+    <marker id="arrBrown" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9c5b12"/>
+    </marker>
+    <style>
+      .h1 { font-size: 20px; font-weight: 700; fill: #1b2220; }
+      .sub { font-size: 13px; fill: #4b5551; }
+      .st { font-size: 14px; font-weight: 700; fill: #1b2220; }
+      .tx { font-size: 12px; fill: #1b2220; }
+      .mu { font-size: 12px; fill: #4b5551; }
+      .wt { font-size: 12px; fill: #7a4a00; }
+      .wb { font-size: 12px; font-weight: 700; fill: #7a4a00; }
+      .fl { font-size: 11px; fill: #a61e1e; }
+      .ft { font-size: 14px; font-weight: 700; fill: #a61e1e; }
+      .fx { font-size: 12px; fill: #6b1515; }
+      .ok { font-size: 14px; font-weight: 700; fill: #1f5e3d; }
+      .gl { font-size: 11px; fill: #1f5e3d; }
+      .ct { font-size: 13px; font-weight: 700; fill: #1b2220; }
+      .sec { font-size: 12px; font-weight: 700; fill: #4b5551; letter-spacing: 1px; }
+      .step { fill: #e8eefb; stroke: #2346a0; stroke-width: 1.5; }
+      .cam { fill: #f1e9fb; stroke: #6b3fa0; stroke-width: 1.5; }
+      .drill { fill: #e6f3f5; stroke: #1f6f7a; stroke-width: 1.5; }
+      .wait { fill: #fff6e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .fail { fill: #fdecec; stroke: #c53030; stroke-width: 1.5; }
+      .done { fill: #e6f4e6; stroke: #2f855a; stroke-width: 1.5; }
+      .clean { fill: #f1f3f2; stroke: #4b5551; stroke-width: 1.5; }
+      .inner { fill: #ffffff; stroke: #9aa39e; stroke-width: 1; }
+      .zone { fill: none; stroke: #9aa39e; stroke-width: 1.2; stroke-dasharray: 3 3; }
+      .net { fill: #fbf3e8; stroke: #9c5b12; stroke-width: 1.5; }
+      .disk { fill: #f4f4ef; stroke: #6b6b55; stroke-width: 1.3; }
+      .flow { stroke: #4b5551; stroke-width: 1.6; fill: none; }
+      .link { stroke: #b7791f; stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; }
+      .fpath { stroke: #c53030; stroke-width: 1.4; fill: none; }
+      .gpath { stroke: #2f855a; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+      .data { stroke: #1f6f7a; stroke-width: 1.4; fill: none; }
+      .npath { stroke: #9c5b12; stroke-width: 1.4; fill: none; stroke-dasharray: 6 4; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1280" height="2112" fill="#fcfcfb"/>
+  <text x="40" y="40" class="h1">NewFusionExtension: per-component workflow</text>
+  <text x="40" y="64" class="sub">Engine._component_steps (nfe/engine.py). Each step runs on Fusion's UI thread one tick at a time; waits are polled once per tick and never block Fusion.</text>
+
+  <!-- row 0: series rule -->
+  <rect x="40" y="100" width="470" height="50" rx="8" class="step"/>
+  <text x="56" y="121" class="st">Series rule found for type + series_id?</text>
+  <text x="56" y="140" class="mu">nfe.rules.resolve, chosen when the order is planned</text>
+  <line x1="510" y1="125" x2="1028" y2="125" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="980" y="119" class="fl" text-anchor="middle">no matching rule</text>
+  <line x1="275" y1="150" x2="275" y2="178" class="flow" marker-end="url(#arr)"/>
+  <text x="283" y="170" class="mu">yes</text>
+
+  <!-- step 1: open_model -->
+  <rect x="40" y="180" width="470" height="102" rx="8" class="step"/>
+  <text x="56" y="202" class="st">1  open_model</text>
+  <text x="56" y="222" class="tx">Cached model still valid and unmodified: reuse it. Otherwise</text>
+  <text x="56" y="239" class="tx">_resolve the cloud file (fresh lookup), reuse an open copy or open it.</text>
+  <text x="56" y="256" class="tx">Stale version guard: if the hub hands out a version older than the</text>
+  <text x="56" y="273" class="tx">one this add-in saved, close and reopen (Engine._get_model).</text>
+  <line x1="510" y1="231" x2="540" y2="231" class="link"/>
+  <rect x="540" y="193" width="270" height="76" rx="8" class="wait"/>
+  <text x="675" y="215" class="wb" text-anchor="middle">Sleep 0.5 s</text>
+  <text x="675" y="233" class="wt" text-anchor="middle">lookup retry 6 x 10 s; stale: reopen</text>
+  <text x="675" y="251" class="wt" text-anchor="middle">up to 4 x, waiting 5 s x attempt</text>
+  <line x1="810" y1="231" x2="1028" y2="231" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="212" class="fl" text-anchor="middle">file not found / open failed /</text>
+  <text x="919" y="225" class="fl" text-anchor="middle">hub keeps returning an old version</text>
+  <line x1="275" y1="282" x2="275" y2="308" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 2: apply_parameters -->
+  <rect x="40" y="310" width="470" height="102" rx="8" class="step"/>
+  <text x="56" y="332" class="st">2  apply_parameters</text>
+  <text x="56" y="352" class="tx">orders.input_transforms; derived a_order_number = order id</text>
+  <text x="56" y="369" class="tx">plan_assignments: units, bools 1/0, quoted text, null_policy</text>
+  <text x="56" y="386" class="tx">design.modifyParameters (one batch), read back every value;</text>
+  <text x="56" y="403" class="tx">timeline errors / warnings added as warnings</text>
+  <line x1="510" y1="361" x2="540" y2="361" class="link"/>
+  <rect x="540" y="332" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="354" class="wb" text-anchor="middle">yield None</text>
+  <text x="675" y="372" class="wt" text-anchor="middle">one tick for Fusion to recompute</text>
+  <line x1="810" y1="361" x2="1028" y2="361" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="342" class="fl" text-anchor="middle">bad value, verify mismatch,</text>
+  <text x="919" y="355" class="fl" text-anchor="middle">unknown param (policy fail)</text>
+  <line x1="275" y1="412" x2="275" y2="438" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 3: save_model -->
+  <rect x="40" y="440" width="470" height="102" rx="8" class="step"/>
+  <text x="56" y="462" class="st">3  save_model  (processing.save_model, default on)</text>
+  <text x="56" y="482" class="tx">Refuses to save a copy older than the version already saved.</text>
+  <text x="56" y="499" class="tx">doc.save("NFE &lt;order_id&gt; &lt;component_id&gt;")</text>
+  <text x="56" y="516" class="tx">Complete when: not modified, version &gt; previous, isComplete.</text>
+  <text x="56" y="533" class="tx">Then read_values: the recomputed model values (lengths in inches).</text>
+  <line x1="510" y1="491" x2="540" y2="491" class="link"/>
+  <rect x="540" y="462" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="484" class="wb" text-anchor="middle">WaitFor model cloud save</text>
+  <text x="675" y="502" class="wt" text-anchor="middle">save_timeout_s = 300 s</text>
+  <line x1="810" y1="491" x2="1028" y2="491" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="472" class="fl" text-anchor="middle">save() False / timeout /</text>
+  <text x="919" y="485" class="fl" text-anchor="middle">out-of-date copy</text>
+  <line x1="275" y1="542" x2="275" y2="568" class="flow" marker-end="url(#arr)"/>
+  <text x="289" y="562" class="sec">DRILLING</text>
+
+  <!-- step 4: drilling -->
+  <rect x="40" y="570" width="470" height="102" rx="8" class="drill"/>
+  <text x="56" y="592" class="st">4  drilling  (doors and stiles; drilling.enabled)</text>
+  <text x="56" y="612" class="tx">drilling.component_drilling: hole records for the Gannomat.</text>
+  <text x="56" y="629" class="tx">Door: hinge side, WS1 or WS4, air drill on the other workstop.</text>
+  <text x="56" y="646" class="tx">Stile: only sides a door hinges onto; workstop per side and</text>
+  <text x="56" y="663" class="tx">FlipRotate. Kept for the order's drilling file (no Fusion work).</text>
+  <line x1="275" y1="672" x2="275" y2="698" class="flow" marker-end="url(#arr)"/>
+  <text x="289" y="692" class="sec">MANUFACTURE  (only when the table picks setups)</text>
+
+  <!-- step 5: plan_toolpaths -->
+  <rect x="40" y="700" width="470" height="119" rx="8" class="cam"/>
+  <text x="56" y="722" class="st">5  plan_toolpaths  (cam.enabled)</text>
+  <text x="56" y="742" class="tx">Find the component's toolpath table (3X8X doors, 3X82 / 3X86</text>
+  <text x="56" y="759" class="tx">stiles, 3X8X panels); read its variables from the model/order.</text>
+  <text x="56" y="776" class="tx">First matching row gives the setups: one per side for doors and</text>
+  <text x="56" y="793" class="tx">stiles, exactly one for panels (height &gt;= width or not).</text>
+  <text x="56" y="810" class="tx">No setups (or no table for the component): skip to 10.</text>
+  <line x1="510" y1="759.5" x2="1028" y2="759.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="740.5" class="fl" text-anchor="middle">no row matches /</text>
+  <text x="919" y="753.5" class="fl" text-anchor="middle">toolpath tables invalid</text>
+  <line x1="275" y1="819" x2="275" y2="845" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 6: manufacture_workspace -->
+  <rect x="40" y="847" width="470" height="85" rx="8" class="cam"/>
+  <text x="56" y="869" class="st">6  manufacture_workspace</text>
+  <text x="56" y="889" class="tx">Activate the model, switch to MANUFACTURE (cam.switch_workspace).</text>
+  <text x="56" y="906" class="tx">cam_prepare: unsuppress the chosen setups and operations,</text>
+  <text x="56" y="923" class="tx">suppress the rest, apply the table's operation rules.</text>
+  <line x1="510" y1="889.5" x2="1028" y2="889.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="870.5" class="fl" text-anchor="middle">no CAM setups /</text>
+  <text x="919" y="883.5" class="fl" text-anchor="middle">setup not found in the model</text>
+  <line x1="275" y1="932" x2="275" y2="958" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 7: generate_toolpaths -->
+  <rect x="40" y="960" width="470" height="68" rx="8" class="cam"/>
+  <text x="56" y="982" class="st">7  generate_toolpaths</text>
+  <text x="56" y="1002" class="tx">cam.generateToolpath for the chosen setups; then check every</text>
+  <text x="56" y="1019" class="tx">operation: errors fail, warnings are recorded.</text>
+  <line x1="510" y1="994" x2="540" y2="994" class="link"/>
+  <rect x="540" y="965" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="987" class="wb" text-anchor="middle">WaitFor toolpath generation</text>
+  <text x="675" y="1005" class="wt" text-anchor="middle">cam.generate_timeout_s = 300 s</text>
+  <line x1="810" y1="994" x2="1028" y2="994" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="988" class="fl" text-anchor="middle">not generated / timeout</text>
+  <line x1="275" y1="1028" x2="275" y2="1054" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 8: post_process -->
+  <rect x="40" y="1056" width="470" height="68" rx="8" class="cam"/>
+  <text x="56" y="1078" class="st">8  post_process</text>
+  <text x="56" y="1098" class="tx">Each setup with post/Anderson Stratos 2.cps into output/.../_nc/,</text>
+  <text x="56" y="1115" class="tx">program number from state/nc_program_counter.txt (O1001 ...).</text>
+  <line x1="510" y1="1090" x2="540" y2="1090" class="link"/>
+  <rect x="540" y="1061" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="1083" class="wb" text-anchor="middle">yield None between posts</text>
+  <text x="675" y="1101" class="wt" text-anchor="middle">keeps Fusion responsive</text>
+  <line x1="810" y1="1090" x2="1028" y2="1090" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1084" class="fl" text-anchor="middle">post processor missing / error</text>
+  <line x1="275" y1="1124" x2="275" y2="1150" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 9: splice_gcode -->
+  <rect x="40" y="1152" width="470" height="85" rx="8" class="cam"/>
+  <text x="56" y="1174" class="st">9  splice_gcode</text>
+  <text x="56" y="1194" class="tx">G57 section before G59; M0 stop block with FLIP or ROTATE text;</text>
+  <text x="56" y="1211" class="tx">N renumbered, CRLF, one program 1-&lt;component&gt;-&lt;order&gt;.txt.</text>
+  <text x="56" y="1228" class="tx">Removes _nc/ (unless keep_nc_sections); back to DESIGN.</text>
+  <line x1="510" y1="1194.5" x2="1028" y2="1194.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1188.5" class="fl" text-anchor="middle">write error</text>
+  <line x1="275" y1="1237" x2="275" y2="1263" class="flow" marker-end="url(#arr)"/>
+  <text x="289" y="1257" class="sec">DRAWING</text>
+
+  <!-- step 10: open_drawing -->
+  <rect x="40" y="1265" width="470" height="85" rx="8" class="step"/>
+  <text x="56" y="1287" class="st">10  open_drawing</text>
+  <text x="56" y="1307" class="tx">Rule without a drawing: fail (default) or warn and finish</text>
+  <text x="56" y="1324" class="tx">without a PDF (missing_drawing_policy).</text>
+  <text x="56" y="1341" class="tx">Otherwise _resolve the drawing, reuse an open copy or open it.</text>
+  <line x1="510" y1="1307.5" x2="540" y2="1307.5" class="link"/>
+  <rect x="540" y="1278.5" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="1300.5" class="wb" text-anchor="middle">Sleep drawing_settle_s</text>
+  <text x="675" y="1318.5" class="wt" text-anchor="middle">default 2.0 s</text>
+  <line x1="810" y1="1307.5" x2="1028" y2="1307.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1301.5" class="fl" text-anchor="middle">no drawing (policy fail)</text>
+  <line x1="275" y1="1350" x2="275" y2="1376" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 11: update_drawing -->
+  <rect x="40" y="1378" width="470" height="85" rx="8" class="step"/>
+  <text x="56" y="1400" class="st">11  update_drawing</text>
+  <text x="56" y="1420" class="tx">updateAllReferences() only when a reference is stale;</text>
+  <text x="56" y="1437" class="tx">getLatestVersion() until the reference reaches the saved</text>
+  <text x="56" y="1454" class="tx">model version. Then settle 2 s.</text>
+  <line x1="510" y1="1420.5" x2="540" y2="1420.5" class="link"/>
+  <rect x="540" y="1391.5" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="1413.5" class="wb" text-anchor="middle">WaitFor new version referenced</text>
+  <text x="675" y="1431.5" class="wt" text-anchor="middle">drawing_update_timeout_s = 180 s</text>
+  <line x1="810" y1="1420.5" x2="1028" y2="1420.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1414.5" class="fl" text-anchor="middle">not referenced / timeout</text>
+  <line x1="275" y1="1463" x2="275" y2="1489" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 12: export_pdf -->
+  <rect x="40" y="1491" width="470" height="68" rx="8" class="step"/>
+  <text x="56" y="1513" class="st">12  export_pdf</text>
+  <text x="56" y="1533" class="tx">All sheets to _partial_&lt;name&gt;.pdf, then os.replace to</text>
+  <text x="56" y="1550" class="tx">1-&lt;component&gt;-&lt;order&gt;-drawing.pdf in the run folder.</text>
+  <line x1="510" y1="1525" x2="540" y2="1525" class="link"/>
+  <rect x="540" y="1496" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="1518" class="wb" text-anchor="middle">WaitFor PDF file (%PDF-, 64+ bytes)</text>
+  <text x="675" y="1536" class="wt" text-anchor="middle">export_timeout_s = 300 s</text>
+  <line x1="810" y1="1525" x2="1028" y2="1525" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1519" class="fl" text-anchor="middle">export error / timeout</text>
+  <line x1="275" y1="1559" x2="275" y2="1585" class="flow" marker-end="url(#arr)"/>
+
+  <!-- step 13: save_drawing -->
+  <rect x="40" y="1587" width="470" height="51" rx="8" class="step"/>
+  <text x="56" y="1609" class="st">13  save_drawing  (processing.save_drawing, default off)</text>
+  <text x="56" y="1629" class="tx">Save the updated drawing to the hub as a new version.</text>
+  <line x1="510" y1="1612.5" x2="540" y2="1612.5" class="link"/>
+  <rect x="540" y="1583.5" width="270" height="58" rx="8" class="wait"/>
+  <text x="675" y="1605.5" class="wb" text-anchor="middle">WaitFor drawing cloud save</text>
+  <text x="675" y="1623.5" class="wt" text-anchor="middle">save_timeout_s = 300 s</text>
+  <line x1="810" y1="1612.5" x2="1028" y2="1612.5" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="919" y="1606.5" class="fl" text-anchor="middle">timeout</text>
+  <line x1="275" y1="1638" x2="275" y2="1664" class="flow" marker-end="url(#arr)"/>
+
+  <!-- bypass: no setups chosen -> drawing, MANUFACTURE never opened -->
+  <polyline points="40,805 30,805 30,1281 38,1281" class="gpath" marker-end="url(#arrGreen)"/>
+  <text x="48" y="1257" class="gl">skip MANUFACTURE</text>
+
+  <!-- done -->
+  <rect x="155" y="1666" width="240" height="44" rx="8" class="done"/>
+  <text x="275" y="1693" class="ok" text-anchor="middle">status = done</text>
+  <polyline points="40,1338 22,1338 22,1688 153,1688" class="gpath" marker-end="url(#arrGreen)"/>
+  <text x="28" y="1680" class="mu">policy warn</text>
+
+  <!-- failure box -->
+  <rect x="1030" y="100" width="210" height="1610" rx="8" class="fail"/>
+  <text x="1135" y="825" class="ft" text-anchor="middle">Component failed</text>
+  <text x="1135" y="849" class="fx" text-anchor="middle">status = failed</text>
+  <text x="1135" y="867" class="fx" text-anchor="middle">error = the message</text>
+  <text x="1135" y="885" class="fx" text-anchor="middle"></text>
+  <text x="1135" y="903" class="fx" text-anchor="middle">ComponentError and</text>
+  <text x="1135" y="921" class="fx" text-anchor="middle">StepTimeout: message only</text>
+  <text x="1135" y="939" class="fx" text-anchor="middle">other exceptions: also</text>
+  <text x="1135" y="957" class="fx" text-anchor="middle">a traceback</text>
+  <text x="1135" y="975" class="fx" text-anchor="middle"></text>
+  <text x="1135" y="993" class="fx" text-anchor="middle">The order continues with</text>
+  <text x="1135" y="1011" class="fx" text-anchor="middle">the next component.</text>
+  <line x1="275" y1="1710" x2="275" y2="1750" class="flow" marker-end="url(#arr)"/>
+  <line x1="1135" y1="1710" x2="1135" y2="1750" class="fpath" marker-end="url(#arrRed)"/>
+
+  <!-- cleanup -->
+  <rect x="40" y="1752" width="1200" height="170" rx="8" class="clean"/>
+  <text x="56" y="1775" class="st">14  cleanup: always runs, after success or failure  (Engine._after_component)</text>
+  <rect x="56" y="1789" width="220" height="118" rx="6" class="inner"/>
+  <text x="68" y="1809" class="ct">Workspace + drawing</text>
+  <text x="68" y="1829" class="tx">back to DESIGN if still</text>
+  <text x="68" y="1846" class="tx">in MANUFACTURE;</text>
+  <text x="68" y="1863" class="tx">_close_verified drawing:</text>
+  <text x="68" y="1880" class="tx">wait for isValid false</text>
+  <line x1="277" y1="1848" x2="291" y2="1848" class="flow" marker-end="url(#arr)"/>
+  <rect x="293" y="1789" width="220" height="118" rx="6" class="inner"/>
+  <text x="305" y="1809" class="ct">Model</text>
+  <text x="305" y="1829" class="tx">failed, or dirty after</text>
+  <text x="305" y="1846" class="tx">CAM: close unsaved;</text>
+  <text x="305" y="1863" class="tx">else keep for the next</text>
+  <text x="305" y="1880" class="tx">component (cache size 1)</text>
+  <line x1="514" y1="1848" x2="528" y2="1848" class="flow" marker-end="url(#arr)"/>
+  <rect x="530" y="1789" width="220" height="118" rx="6" class="inner"/>
+  <text x="542" y="1809" class="ct">Periodic recycle</text>
+  <text x="542" y="1829" class="tx">every 25 components</text>
+  <text x="542" y="1846" class="tx">(recycle_every_components)</text>
+  <text x="542" y="1863" class="tx">also closes the cached</text>
+  <text x="542" y="1880" class="tx">models</text>
+  <line x1="751" y1="1848" x2="765" y2="1848" class="flow" marker-end="url(#arr)"/>
+  <rect x="767" y="1789" width="220" height="118" rx="6" class="inner"/>
+  <text x="779" y="1809" class="ct">Garbage collection</text>
+  <text x="779" y="1829" class="tx">close up to 20 managed</text>
+  <text x="779" y="1846" class="tx">docs: ours, hidden copies,</text>
+  <text x="779" y="1863" class="tx">configured files (verified)</text>
+  <text x="779" y="1880" class="tx">then Python gc.collect()</text>
+  <line x1="988" y1="1848" x2="1002" y2="1848" class="flow" marker-end="url(#arr)"/>
+  <rect x="1004" y="1789" width="220" height="118" rx="6" class="inner"/>
+  <text x="1016" y="1809" class="ct">Health sample</text>
+  <text x="1016" y="1829" class="tx">threads, MB, handles,</text>
+  <text x="1016" y="1846" class="tx">open documents; stored</text>
+  <text x="1016" y="1863" class="tx">as health_after and in</text>
+  <text x="1016" y="1880" class="tx">status.json</text>
+  <line x1="640" y1="1922" x2="640" y2="1950" class="flow" marker-end="url(#arr)"/>
+
+  <!-- back in the order -->
+  <rect x="200" y="1952" width="880" height="68" rx="8" class="step"/>
+  <text x="640" y="1973" class="st" text-anchor="middle">Back in Engine._order_gen</text>
+  <text x="640" y="1992" class="tx" text-anchor="middle">checkpoint, counters, _check_health (may request a Fusion restart), next component</text>
+  <text x="640" y="2010" class="tx" text-anchor="middle">after the last one: _finalize_outputs: &lt;order&gt;.json drilling file, copies to machine_drops/, report</text>
+
+  <!-- legend -->
+  <rect x="40" y="2056" width="18" height="12" rx="2" class="step"/>
+  <text x="64" y="2067" class="tx">Model / drawing step</text>
+  <rect x="220" y="2056" width="18" height="12" rx="2" class="drill"/>
+  <text x="244" y="2067" class="tx">Drilling</text>
+  <rect x="316" y="2056" width="18" height="12" rx="2" class="cam"/>
+  <text x="340" y="2067" class="tx">Manufacture (CAM)</text>
+  <rect x="475" y="2056" width="18" height="12" rx="2" class="wait"/>
+  <text x="499" y="2067" class="tx">Wait: polled once per tick</text>
+  <rect x="697" y="2056" width="18" height="12" rx="2" class="done"/>
+  <text x="721" y="2067" class="tx">Success</text>
+  <line x1="786" y1="2062" x2="822" y2="2062" class="fpath" marker-end="url(#arrRed)"/>
+  <text x="830" y="2067" class="tx">Failure path</text>
+  <line x1="926" y1="2062" x2="962" y2="2062" class="gpath" marker-end="url(#arrGreen)"/>
+  <text x="970" y="2067" class="tx">Skip</text>
+  <text x="40" y="2086" class="mu">Pause, cancel and restart requests are honoured only between components; a component always finishes its steps and cleanup first. Timeouts: config keys, defaults from nfe/config.py.</text>
+</svg>

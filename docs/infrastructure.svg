@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1000" viewBox="0 0 1280 1000" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <title>NewFusionExtension infrastructure</title>
+  <desc>Processes, threads, ports, files and external systems: the harness (dashboard, supervisor, network sync), Fusion 360 with the add-in (API server, inbox thread, ticker, engine), the Autodesk hub, the local project folders and the ddc-mefs network shares.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4b5551"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c53030"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2f855a"/>
+    </marker>
+    <marker id="arrTeal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f6f7a"/>
+    </marker>
+    <marker id="arrBrown" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9c5b12"/>
+    </marker>
+    <style>
+      .h1 { font-size: 20px; font-weight: 700; fill: #1b2220; }
+      .sub { font-size: 13px; fill: #4b5551; }
+      .st { font-size: 14px; font-weight: 700; fill: #1b2220; }
+      .tx { font-size: 12px; fill: #1b2220; }
+      .mu { font-size: 12px; fill: #4b5551; }
+      .wt { font-size: 12px; fill: #7a4a00; }
+      .wb { font-size: 12px; font-weight: 700; fill: #7a4a00; }
+      .fl { font-size: 11px; fill: #a61e1e; }
+      .ft { font-size: 14px; font-weight: 700; fill: #a61e1e; }
+      .fx { font-size: 12px; fill: #6b1515; }
+      .ok { font-size: 14px; font-weight: 700; fill: #1f5e3d; }
+      .gl { font-size: 11px; fill: #1f5e3d; }
+      .ct { font-size: 13px; font-weight: 700; fill: #1b2220; }
+      .sec { font-size: 12px; font-weight: 700; fill: #4b5551; letter-spacing: 1px; }
+      .step { fill: #e8eefb; stroke: #2346a0; stroke-width: 1.5; }
+      .cam { fill: #f1e9fb; stroke: #6b3fa0; stroke-width: 1.5; }
+      .drill { fill: #e6f3f5; stroke: #1f6f7a; stroke-width: 1.5; }
+      .wait { fill: #fff6e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .fail { fill: #fdecec; stroke: #c53030; stroke-width: 1.5; }
+      .done { fill: #e6f4e6; stroke: #2f855a; stroke-width: 1.5; }
+      .clean { fill: #f1f3f2; stroke: #4b5551; stroke-width: 1.5; }
+      .inner { fill: #ffffff; stroke: #9aa39e; stroke-width: 1; }
+      .zone { fill: none; stroke: #9aa39e; stroke-width: 1.2; stroke-dasharray: 3 3; }
+      .net { fill: #fbf3e8; stroke: #9c5b12; stroke-width: 1.5; }
+      .disk { fill: #f4f4ef; stroke: #6b6b55; stroke-width: 1.3; }
+      .flow { stroke: #4b5551; stroke-width: 1.6; fill: none; }
+      .link { stroke: #b7791f; stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; }
+      .fpath { stroke: #c53030; stroke-width: 1.4; fill: none; }
+      .gpath { stroke: #2f855a; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+      .data { stroke: #1f6f7a; stroke-width: 1.4; fill: none; }
+      .npath { stroke: #9c5b12; stroke-width: 1.4; fill: none; stroke-dasharray: 6 4; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1280" height="1000" fill="#fcfcfb"/>
+  <text x="40" y="40" class="h1">NewFusionExtension: software infrastructure</text>
+  <text x="40" y="64" class="sub">Two processes on the workstation. Fusion only writes locally; the harness copies results to the network, so a slow share never stalls an order.</text>
+
+  <!-- browser -->
+  <rect x="40" y="90" width="300" height="70" rx="8" class="inner"/>
+  <text x="56" y="114" class="st">Browser: dashboard</text>
+  <text x="56" y="134" class="tx">http://127.0.0.1:8765  (Orders, Series, Logic</text>
+  <text x="56" y="150" class="tx">tables, Settings + Location, Docs)</text>
+  <line x1="190" y1="160" x2="190" y2="206" class="flow" marker-end="url(#arr)"/>
+  <text x="198" y="188" class="mu">HTTP, same-site POSTs only</text>
+
+  <!-- harness process -->
+  <rect x="40" y="208" width="560" height="330" rx="8" class="zone"/>
+  <text x="56" y="230" class="st">Harness process  (pythonw harness/server.py, port 8765)</text>
+  <rect x="56" y="244" width="258" height="132" rx="8" class="step"/>
+  <text x="68" y="266" class="ct">HTTP server</text>
+  <text x="68" y="288" class="tx">static dashboard, /api/* </text>
+  <text x="68" y="305" class="tx">proxy to the add-in API,</text>
+  <text x="68" y="322" class="tx">logic tables, docs, uploads</text>
+  <rect x="326" y="244" width="258" height="132" rx="8" class="step"/>
+  <text x="338" y="266" class="ct">Supervisor thread</text>
+  <text x="338" y="288" class="tx">polls the add-in heartbeat;</text>
+  <text x="338" y="305" class="tx">starts / restarts Fusion</text>
+  <text x="338" y="322" class="tx">(FusionLauncher + .ini)</text>
+  <text x="338" y="339" class="tx">on hang or restart request</text>
+  <rect x="56" y="384" width="258" height="132" rx="8" class="step"/>
+  <text x="68" y="406" class="ct">Sync thread  (nfe.sync)</text>
+  <text x="68" y="428" class="tx">every 15 s: new files older</text>
+  <text x="68" y="445" class="tx">than 5 s, copy as .syncpart</text>
+  <text x="68" y="462" class="tx">then rename; state file;</text>
+  <text x="68" y="479" class="tx">local: network_mirror/</text>
+  <rect x="326" y="384" width="258" height="132" rx="8" class="step"/>
+  <text x="338" y="406" class="ct">Location</text>
+  <text x="338" y="428" class="tx">config.json location.mode</text>
+  <text x="338" y="445" class="tx">local / remote; checks</text>
+  <text x="338" y="462" class="tx">every path reachable /</text>
+  <text x="338" y="479" class="tx">writable (non-blocking)</text>
+
+  <!-- fusion process -->
+  <rect x="680" y="90" width="560" height="448" rx="8" class="zone"/>
+  <text x="696" y="112" class="st">Fusion 360 process  (add-in NewFusionExtension)</text>
+  <rect x="696" y="126" width="258" height="122" rx="8" class="step"/>
+  <text x="708" y="148" class="ct">API server thread</text>
+  <text x="708" y="170" class="tx">127.0.0.1:8766 (api.port)</text>
+  <text x="708" y="187" class="tx">status, orders, rules, gc,</text>
+  <text x="708" y="204" class="tx">hub browse; JSON + same-site</text>
+  <rect x="966" y="126" width="258" height="122" rx="8" class="step"/>
+  <text x="978" y="148" class="ct">Inbox thread (nfe-inbox)</text>
+  <text x="978" y="170" class="tx">scans the inbox (local or</text>
+  <text x="978" y="187" class="tx">\\ddc-mefs share), claims</text>
+  <text x="978" y="204" class="tx">orders into processing/</text>
+  <rect x="696" y="262" width="258" height="122" rx="8" class="step"/>
+  <text x="708" y="284" class="ct">Ticker thread</text>
+  <text x="708" y="306" class="tx">fires one CustomEvent at a</text>
+  <text x="708" y="323" class="tx">time (never adsk.doEvents)</text>
+  <text x="708" y="340" class="tx">writes the heartbeat</text>
+  <rect x="966" y="262" width="258" height="122" rx="8" class="cam"/>
+  <text x="978" y="284" class="ct">UI thread: Engine</text>
+  <text x="978" y="306" class="tx">generator state machine:</text>
+  <text x="978" y="323" class="tx">model, drilling, CAM,</text>
+  <text x="978" y="340" class="tx">drawing, cleanup, GC</text>
+  <rect x="696" y="398" width="528" height="122" rx="8" class="cam"/>
+  <text x="708" y="420" class="ct">FusionOps (nfe/fusion_ops.py)</text>
+  <text x="708" y="442" class="tx">documents, parameters, save, drawing references, PDF export,</text>
+  <text x="708" y="459" class="tx">CAM: workspace, setups, generateToolpath, postProcess</text>
+  <text x="708" y="476" class="tx">(post/Anderson Stratos 2.cps)</text>
+  <line x1="825" y1="384" x2="825" y2="398" class="flow" marker-end="url(#arr)"/>
+  <line x1="1095" y1="384" x2="1095" y2="398" class="flow" marker-end="url(#arr)"/>
+  <line x1="954" y1="322" x2="966" y2="322" class="flow" marker-end="url(#arr)"/>
+  <line x1="600" y1="290" x2="694" y2="180" class="flow" marker-end="url(#arr)"/>
+  <text x="676" y="176" class="mu" text-anchor="end">HTTP :8766</text>
+  <polyline points="694,330 640,330 640,320 586,320" class="link" marker-end="url(#arr)"/>
+  <text x="600" y="346" class="wt">heartbeat file</text>
+
+  <!-- hub -->
+  <rect x="980" y="570" width="260" height="86" rx="8" class="inner"/>
+  <text x="996" y="594" class="st">Autodesk hub (cloud)</text>
+  <text x="996" y="614" class="tx">2X8X / 3X8X models + drawings;</text>
+  <text x="996" y="631" class="tx">save = new version (async)</text>
+  <line x1="1110" y1="520" x2="1110" y2="568" class="flow" marker-end="url(#arr)"/>
+
+  <!-- local project folder -->
+  <rect x="40" y="580" width="900" height="230" rx="8" class="zone"/>
+  <text x="56" y="602" class="st">Project folder (this computer)</text>
+  <rect x="56" y="616" width="210" height="100" rx="6" class="disk"/>
+  <text x="66" y="636" class="ct">dropbox/</text>
+  <text x="66" y="655" class="tx">inbox (local mode)</text>
+  <text x="66" y="671" class="tx">processing, done, failed</text>
+  <text x="66" y="687" class="tx">*.report.json</text>
+  <rect x="276" y="616" width="210" height="100" rx="6" class="disk"/>
+  <text x="286" y="636" class="ct">output/</text>
+  <text x="286" y="655" class="tx">&lt;order&gt; &lt;Mon D YYYY - HHMM&gt;/</text>
+  <text x="286" y="671" class="tx">1-&lt;comp&gt;-&lt;order&gt;.txt</text>
+  <text x="286" y="687" class="tx">1-&lt;comp&gt;-&lt;order&gt;-drawing.pdf</text>
+  <text x="286" y="703" class="tx">&lt;order&gt;.json, -report.json</text>
+  <rect x="496" y="616" width="210" height="100" rx="6" class="disk"/>
+  <text x="506" y="636" class="ct">machine_drops/</text>
+  <text x="506" y="655" class="tx">anderson/ (G-code)</text>
+  <text x="506" y="671" class="tx">gannomat/ (drilling)</text>
+  <text x="506" y="687" class="tx">flat copies for the sync</text>
+  <rect x="716" y="616" width="210" height="100" rx="6" class="disk"/>
+  <text x="726" y="636" class="ct">config/, state/, post/</text>
+  <text x="726" y="655" class="tx">config.json, rules, toolpath</text>
+  <text x="726" y="671" class="tx">tables; status, checkpoint,</text>
+  <text x="726" y="687" class="tx">NC counter; .cps .mch .tools</text>
+  <rect x="56" y="726" width="210" height="72" rx="6" class="disk"/>
+  <text x="66" y="746" class="ct">network_mirror/</text>
+  <text x="66" y="765" class="tx">local-mode stand-in for</text>
+  <text x="66" y="781" class="tx">the shares</text>
+  <rect x="276" y="726" width="210" height="72" rx="6" class="disk"/>
+  <text x="286" y="746" class="ct">docs/, logs/</text>
+  <text x="286" y="765" class="tx">documentation + diagrams</text>
+  <text x="286" y="781" class="tx">(served on the Docs tab)</text>
+  <line x1="820" y1="520" x2="820" y2="578" class="data" marker-end="url(#arrTeal)"/>
+  <text x="828" y="556" class="mu">claims orders, writes run folder + drops</text>
+
+  <!-- network shares -->
+  <rect x="40" y="850" width="1200" height="120" rx="8" class="net"/>
+  <text x="56" y="874" class="st">Network shares  (remote mode; paths from the old pipeline)</text>
+  <text x="56" y="900" class="tx">\\ddc-mefs\iBob-Export\S2S_Export</text>
+  <text x="56" y="915" class="mu">incoming orders (inbox)</text>
+  <text x="451" y="900" class="tx">\\ddc-mefs\Anderson</text>
+  <text x="451" y="915" class="mu">G-code .txt</text>
+  <text x="846" y="900" class="tx">\\ddc-mefs\Gannomat\F360_output</text>
+  <text x="846" y="915" class="mu">drilling .json</text>
+  <text x="56" y="936" class="tx">\\ddc-mefs\Fusion\Fusion Folders\output</text>
+  <text x="56" y="951" class="mu">run folders</text>
+  <text x="451" y="936" class="tx">...\order_completed, ...\order_failed</text>
+  <text x="451" y="951" class="mu">finished orders</text>
+  <polyline points="185,516 185,540 20,540 20,840 60,840 60,848" class="npath" marker-end="url(#arrBrown)"/>
+  <text x="26" y="832" class="wt">sync copies</text>
+  <polyline points="1100,848 1100,840 1256,840 1256,190 1226,190" class="npath" marker-end="url(#arrBrown)"/>
+  <text x="1244" y="832" class="wt" text-anchor="end">inbox thread reads orders (remote)</text>
+  <text x="40" y="990" class="mu">Arrows: grey = control / HTTP, teal = files written by Fusion, brown dashed = network. Details in ARCHITECTURE.md and tables/DIRECTORIES.md.</text>
+</svg>

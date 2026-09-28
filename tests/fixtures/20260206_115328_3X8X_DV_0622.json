@@ -1,0 +1,78 @@
+{
+    "order_id": [
+        "3X8X_DV_0622",
+        "string",
+        "identifier for the order"
+    ],
+    "doors": [
+        {
+            "id": [
+                "D1",
+                "string",
+                "door ID"
+            ],
+            "parameters": {
+                "series_id": [
+                    "3082G.67P",
+                    "string",
+                    "series ID of the component"
+                ],
+                "component_height": [
+                    88.5625,
+                    "float",
+                    "height of the component in inches"
+                ],
+                "component_width": [
+                    32.5625,
+                    "float",
+                    "width of the component in inches"
+                ],
+                "component_floor_clearance": [
+                    4.5,
+                    "float",
+                    "floor clearance of the component in inches"
+                ],
+                "component_ceiling_clearance": [
+                    5.5625,
+                    "float",
+                    "ceiling clearance of the component in inches."
+                ],
+                "door_hinging_right": [
+                    true,
+                    "bool",
+                    "indicates whether the door is hinged on the right side when viewed from outside the stall"
+                ],
+                "door_swinging_out": [
+                    false,
+                    "bool",
+                    "indicates whether the door swings outward into the bathroom"
+                ],
+                "door_wall_post_hinging": [
+                    false,
+                    "bool",
+                    "indicates whether the door is hinged on a wall post"
+                ],
+                "door_wall_post_latching": [
+                    false,
+                    "bool",
+                    "indicates whether the door latches to a wall post"
+                ],
+                "door_wall_keep_latching": [
+                    true,
+                    "bool",
+                    "indicates whether the door latches to a wall keep"
+                ],
+                "door_perp_stile_keeper": [
+                    false,
+                    "bool",
+                    "indicates whether the door latches on a perpendicular stile"
+                ],
+                "floor_to_ceiling": [
+                    false,
+                    "bool",
+                    "indicates whether the stall is floor to ceiling or not"
+                ]
+            }
+        }
+    ]
+}

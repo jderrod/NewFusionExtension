@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NFE Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">NFE Console<small>Fusion order pipeline</small></div>
+    <span class="mode-badge" id="mode-badge" title="Where orders come from and where results go (Settings)">LOCAL</span>
+    <div class="lamps">
+      <span class="lamp" id="lamp-fusion" data-s="off"><i></i>Fusion <b id="fusion-text">—</b></span>
+      <span class="lamp" id="lamp-addin" data-s="off"><i></i>Add-in <b id="addin-text">—</b></span>
+      <span class="lamp" id="lamp-state" data-s="off"><i></i><b id="state-text">—</b></span>
+    </div>
+    <div class="spacer"></div>
+    <div class="row">
+      <button class="btn" id="btn-pause" type="button">Pause</button>
+      <button class="btn" id="btn-resume" type="button" hidden>Resume</button>
+      <button class="btn" id="btn-restart" type="button">Restart Fusion</button>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-view="monitor">Monitor</button>
+    <button role="tab" aria-selected="false" data-view="orders">Orders</button>
+    <button role="tab" aria-selected="false" data-view="series">Series &amp; drawings</button>
+    <button role="tab" aria-selected="false" data-view="logic">Logic tables</button>
+    <button role="tab" aria-selected="false" data-view="settings">Settings</button>
+    <button role="tab" aria-selected="false" data-view="log">Log</button>
+    <button role="tab" aria-selected="false" data-view="docs">Docs</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ================= MONITOR ================= -->
+  <section class="view" id="view-monitor">
+    <div class="card traveler" id="traveler"></div>
+
+    <div class="card counters" id="counters"></div>
+
+    <div class="grid-3">
+      <div class="card chart-card" id="chart-threads"></div>
+      <div class="card chart-card" id="chart-mem"></div>
+      <div class="card chart-card" id="chart-docs"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Recent activity</h2>
+        <div class="events" id="events-short"></div>
+      </div>
+      <div class="card">
+        <h2>Supervisor</h2>
+        <dl class="kv" id="supervisor"></dl>
+        <div class="row" style="margin-top:12px">
+          <button class="btn small" id="btn-gc" type="button">Close leftover documents</button>
+          <button class="btn small" id="btn-cancel" type="button">Cancel current order</button>
+          <label class="inline"><input type="checkbox" id="auto-restart"> Restart Fusion automatically</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ORDERS ================= -->
+  <section class="view" id="view-orders" hidden>
+    <div class="split">
+      <div class="card">
+        <h2>Add an order</h2>
+        <label class="drop" id="drop">
+          <strong>Drop order JSON here</strong>
+          or click to choose a file. It is checked before it goes to the inbox.
+          <input type="file" id="file" accept=".json,application/json" hidden multiple>
+        </label>
+        <div id="preview" style="margin-top:12px"></div>
+        <p class="muted" style="font-size:13px;margin:12px 0 0">Orders can also be copied straight into
+          <span class="mono" id="inbox-path"></span></p>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <h2 style="margin:0">Orders</h2>
+          <div class="seg" id="folder-seg">
+            <button type="button" data-f="inbox" aria-pressed="false">Inbox</button>
+            <button type="button" data-f="processing" aria-pressed="false">Processing</button>
+            <button type="button" data-f="done" aria-pressed="true">Done</button>
+            <button type="button" data-f="failed" aria-pressed="false">Failed</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="orders-table"></table></div>
+      </div>
+    </div>
+    <div class="card" id="report" hidden></div>
+  </section>
+
+  <!-- ================= SERIES ================= -->
+  <section class="view" id="view-series" hidden>
+    <div class="card">
+      <h2>Model and drawing for each series<span class="sub">A component uses the most specific enabled rule that matches its type and series_id.</span></h2>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn" id="btn-suggest" type="button">Suggest rules from hub</button>
+        <button class="btn" id="btn-add-rule" type="button">Add rule</button>
+        <button class="btn" id="btn-refresh-files" type="button">Refresh hub files</button>
+        <span class="spacer" style="flex:1"></span>
+        <span class="muted" id="rules-dirty"></span>
+        <button class="btn primary" id="btn-save-rules" type="button">Save changes</button>
+      </div>
+      <div class="table-wrap"><table class="rules" id="rules-table"></table></div>
+      <div id="suggestions" style="margin-top:12px"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>Check a series</h2>
+        <div class="resolver">
+          <select id="res-type"><option>door</option><option>stile</option><option>panel</option></select>
+          <input type="text" id="res-series" placeholder="series_id, e.g. 3082G.67P">
+          <span class="out" id="res-out"></span>
+        </div>
+        <div id="model-params" style="margin-top:14px"></div>
+      </div>
+      <div class="card">
+        <h2>Family folders in the hub</h2>
+        <dl class="kv" id="family-folders" style="margin-bottom:10px"></dl>
+        <div class="crumbs" id="crumbs"></div>
+        <div class="browser" id="browser"><div class="empty">Loading hubs…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LOGIC TABLES ================= -->
+  <section class="view" id="view-logic" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Logic tables<span class="sub">Exactly what the add-in uses: toolpath selection, G-code splicing, Gannomat drilling, and file naming.</span></h2>
+        <div class="seg" id="logic-seg">
+          <button type="button" data-l="rules" aria-pressed="false">Rules in plain words</button>
+          <button type="button" data-l="toolpaths" aria-pressed="true">Toolpath selection</button>
+          <button type="button" data-l="splicing" aria-pressed="false">Splicing</button>
+          <button type="button" data-l="drilling" aria-pressed="false">Drilling &amp; workstops</button>
+          <button type="button" data-l="naming" aria-pressed="false">Naming</button>
+        </div>
+      </div>
+    </div>
+    <div id="logic-body"></div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="view" id="view-settings" hidden>
+    <div class="card" id="location-card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Location<span class="sub">Local: everything on this computer. Remote: orders from the iBob export share, results copied to the ddc-mefs shares.</span></h2>
+        <div class="seg" id="mode-seg">
+          <button type="button" data-m="local" aria-pressed="true">Local</button>
+          <button type="button" data-m="remote" aria-pressed="false">Remote (network)</button>
+        </div>
+      </div>
+      <div id="location-body" style="margin-top:10px"><div class="muted">Checking directories…</div></div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Processing settings</h2>
+        <button class="btn primary" id="btn-save-settings" type="button">Save settings</button>
+      </div>
+      <p class="muted" style="font-size:13px">The add-in re-reads these at the start of every order.</p>
+      <div class="form-grid" id="settings-form"></div>
+    </div>
+  </section>
+
+  <!-- ================= LOG ================= -->
+  <section class="view" id="view-log" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <h2 style="margin:0">Event log</h2>
+        <div class="seg" id="level-seg">
+          <button type="button" data-l="debug" aria-pressed="false">Everything</button>
+          <button type="button" data-l="info" aria-pressed="true">Info</button>
+          <button type="button" data-l="warn" aria-pressed="false">Problems</button>
+        </div>
+      </div>
+      <div class="events full" id="events-full"></div>
+    </div>
+  </section>
+
+  <!-- ================= DOCS ================= -->
+  <section class="view" id="view-docs" hidden>
+    <div class="docs-split">
+      <nav class="card docs-nav" aria-label="Documents">
+        <h2>Documents</h2>
+        <div id="docs-list"><div class="empty">Loading…</div></div>
+      </nav>
+      <article class="card doc-body" id="doc-body"></article>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

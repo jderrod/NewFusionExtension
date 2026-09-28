@@ -1,0 +1,292 @@
+{
+  "hub": {
+    "name": "Nikorohmz",
+    "project": "Bobrick - Component modeling",
+    "family_folders": {
+      "2X8X": {
+        "id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "name": "2X8X Components"
+      },
+      "3X8X": {
+        "id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "name": "3X8X Components"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "2x8x-door",
+      "enabled": true,
+      "type": "door",
+      "family": "2X8X",
+      "series": "",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:7rcXJNbXSfC-ACOlo_mWvA",
+        "name": "2X8X_Door",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:VLZlZ5bLTl68fgWpryjucw",
+        "name": "2X8X_Door Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      }
+    },
+    {
+      "id": "2x81-2-stile",
+      "enabled": true,
+      "type": "stile",
+      "family": "2X8X",
+      "series": "2?8[12]*",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:cuxlckWNQCCSx71SaO4O7g",
+        "name": "2X81/2_Stile",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:BRxJfgRqQEy7qQjsgtlLHw",
+        "name": "2X81/2_Stile Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      }
+    },
+    {
+      "id": "2x86-8-stile",
+      "enabled": true,
+      "type": "stile",
+      "family": "2X8X",
+      "series": "2?8[68]*",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:3yRqT52LQzW_Zhqsvx8loA",
+        "name": "2X86/8_Stile",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:LbYQNb8OQrSeDkTaTyYTMQ",
+        "name": "2X86/8_Stile Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.84jjyLKKRMabH5iQYKIHmw",
+        "path": "Bobrick - Component modeling/2X8X Components"
+      }
+    },
+    {
+      "id": "3x8x-door",
+      "enabled": true,
+      "type": "door",
+      "family": "3X8X",
+      "series": "",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:IFeILtEVQMO86VHUIss0YA",
+        "name": "3X8X_Door",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:vjLzauQ-Ra2P8QMpASv2NQ",
+        "name": "3X8X_Door Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      }
+    },
+    {
+      "id": "3x8x-panel-standard",
+      "enabled": true,
+      "type": "panel",
+      "family": "3X8X",
+      "series": "",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:lPpSvOEvQTudkeBdWzAphg",
+        "name": "3X8X_Panel_Standard",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:-6329spARyOPDtaj8jaFbg",
+        "name": "3X8X_Panel_Standard Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      }
+    },
+    {
+      "id": "3x81-stile",
+      "enabled": true,
+      "type": "stile",
+      "family": "3X8X",
+      "series": "3?81*",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:spziMsPaRBGeP5E28gvvXA",
+        "name": "3X81_Stile",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:EMcubSHDSgSwy5Jhi1VLLA",
+        "name": "3X81_Stile Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      }
+    },
+    {
+      "id": "3x82-stile",
+      "enabled": true,
+      "type": "stile",
+      "family": "3X8X",
+      "series": "3?82*",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:oEXMLgzETniKzs8Lpc0lWQ",
+        "name": "3X82_Stile",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:DMASeuypQ6W9umraqWs9fw",
+        "name": "3X82_Stile Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      }
+    },
+    {
+      "id": "3x86-stile",
+      "enabled": true,
+      "type": "stile",
+      "family": "3X8X",
+      "series": "3?86*",
+      "model": {
+        "id": "urn:adsk.wipprod:dm.lineage:ZPzMelANTKGtxKGhAAVO3g",
+        "name": "3X86_Stile",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      },
+      "drawing": {
+        "id": "urn:adsk.wipprod:dm.lineage:e6oJFZ4IQ6--sk93K4dutg",
+        "name": "3X86_Stile Drawing",
+        "folder_id": "urn:adsk.wipprod:fs.folder:co.X3pcqmjAQ1K7BL-NJNfikw",
+        "path": "Bobrick - Component modeling/3X8X Components"
+      }
+    }
+  ],
+  "orders": {
+    "type_by_key": {
+      "doors": "door",
+      "stiles": "stile",
+      "panels": "panel"
+    },
+    "type_by_prefix": {
+      "D": "door",
+      "S": "stile",
+      "P": "panel"
+    },
+    "group_by_model": true,
+    "derived_parameters": {
+      "a_order_number": "{order_id}"
+    },
+    "input_transforms": [
+      {
+        "type": "split_text",
+        "component_types": [
+          "panel"
+        ],
+        "from": "cutout",
+        "to": [
+          "cutout_A",
+          "cutout_B"
+        ],
+        "separators": [
+          "&",
+          "+"
+        ]
+      }
+    ],
+    "pdf_name": "{order_id}_{component_id}.pdf"
+  },
+  "naming": {
+    "order_folder": "{order_id} {run_stamp}",
+    "gcode": "1-{component_id}-{order_id}.txt",
+    "drawing_pdf": "1-{component_id}-{order_id}-drawing.pdf",
+    "drilling": "{order_id}.json",
+    "report": "{order_id}-report.json"
+  },
+  "cam": {
+    "enabled": true,
+    "post_processor": "post/Anderson Stratos 2.cps",
+    "program_counter_file": "state/nc_program_counter.txt",
+    "program_counter_start": 1001,
+    "seed_counter_from": "C:/Users/jderr/Fusion Extension/FusionExtensionVM/nc_program_counter.txt",
+    "profiles_file": "config/toolpath_profiles.json",
+    "generate_timeout_s": 300,
+    "switch_workspace": true,
+    "keep_nc_sections": false,
+    "strip_numbered_m30": false
+  },
+  "drilling": {},
+  "drops": {
+    "gcode": "machine_drops/anderson",
+    "drilling": "machine_drops/gannomat",
+    "drawings": ""
+  },
+  "location": {
+    "mode": "local",
+    "local": {
+      "inbox": "",
+      "mirror_root": "network_mirror"
+    },
+    "remote": {
+      "inbox": "\\\\ddc-mefs\\iBob-Export\\S2S_Export",
+      "shares": {
+        "gcode": "\\\\ddc-mefs\\Anderson",
+        "drilling": "\\\\ddc-mefs\\Gannomat\\F360_output",
+        "output": "\\\\ddc-mefs\\Fusion\\Fusion Folders\\output",
+        "order_completed": "\\\\ddc-mefs\\Fusion\\Fusion Folders\\order_completed",
+        "order_failed": "\\\\ddc-mefs\\Fusion\\Fusion Folders\\order_failed"
+      }
+    },
+    "sync": {
+      "enabled": true,
+      "interval_s": 15,
+      "settle_s": 5
+    }
+  },
+  "processing": {
+    "autostart": true,
+    "save_model": true,
+    "save_drawing": false,
+    "open_visible": true,
+    "model_cache_size": 1,
+    "recycle_every_components": 25,
+    "unknown_parameter_policy": "warn",
+    "null_policy": "zero",
+    "missing_drawing_policy": "fail",
+    "open_timeout_s": 600,
+    "save_timeout_s": 300,
+    "drawing_update_timeout_s": 180,
+    "drawing_settle_s": 2.0,
+    "export_timeout_s": 300,
+    "step_stuck_timeout_s": 900
+  },
+  "health": {
+    "max_threads": 4000,
+    "max_working_set_mb": 12000,
+    "max_open_documents": 12,
+    "restart_every_components": 200
+  },
+  "supervisor": {
+    "auto_restart_fusion": true,
+    "heartbeat_stale_s": 60,
+    "restart_cooldown_s": 300,
+    "fusion_launcher": ""
+  },
+  "api": {
+    "addin_port": 8766,
+    "harness_port": 8765,
+    "harness_bind": "127.0.0.1",
+    "dev_exec": true,
+    "launch_harness_from_addin": true,
+    "harness_python": ""
+  },
+  "paths": {
+    "dropbox": "",
+    "output": ""
+  }
+}

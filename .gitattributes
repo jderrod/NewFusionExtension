@@ -1,0 +1,7 @@
+* text=auto
+*.bat text eol=crlf
+# G-code fixtures are compared byte for byte (CRLF)
+tests/fixtures/gcode/*.txt -text
+*.cps -text
+*.tools binary
+*.mch -text
