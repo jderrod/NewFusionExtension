@@ -102,7 +102,8 @@ tests.
 | File | Responsibility |
 |---|---|
 | `harness/server.py` | `Harness` class (supervisor, restart worker, dropbox and config operations, add-in proxy), `make_handler`/`route` (HTTP), `main` (CLI: `--port`, `--host`, `--no-supervisor`). Standard library only; imports the shared `nfe` modules from `addin/NewFusionExtension`. |
-| `harness/static/index.html`, `app.js`, `app.css` | The dashboard ("NFE Console"): Monitor, Orders, Series & drawings, Logic tables, Settings (incl. Location), Log, Docs tabs. No build step. |
+| `harness/scenarios.py` | Validation-scenario sheets (`scenarios/*.csv`) → order JSON: `parse_sheet` (finds the header row, types the parameter columns), `select_rows` (all drawing-required rows, or numbers / ranges / ids), `build_order` (one component per order, `order_id` `<Series>-<number>`, `series_id` `<Series>` + `G` when gapless, `drawing_test` = sheet title). |
+| `harness/static/index.html`, `app.js`, `app.css` | The dashboard ("NFE Console"): Monitor, Orders, Scenarios, Series & drawings, Logic tables, Settings (incl. Location), Log, Docs tabs. No build step. |
 
 ### Other folders
 
@@ -318,7 +319,7 @@ start time and duration, and published as `status.component`.
 |---|---|---|---|---|
 | 0 | — | `rule is None` check. | — | `no series rule matches type=... series_id=... - add one in Series Configuration` |
 | 1 | `open_model` | `_get_model`: reuse a cached model if it is alive and not modified; otherwise close the stale one, evict least-recently-used models until there is room, `_resolve` the cloud file (fresh `findFileById(...).latestVersion` every time, no cache), reuse an open visible up-to-date unmodified copy of a document that was not open before the add-in started (`find_open`) or `open_document(visible=open_visible)`, then `Sleep(0.5)`. **Stale version guard:** if the opened version is older than the version the engine last saved for this model (`_saved_versions`), close it, wait `STALE_BACKOFF_S` × attempt (5 s), look up and reopen, up to `STALE_REOPENS` = 4 times. | `_resolve` retries lookups (6 attempts, 10 s apart) | `rule has no model selected`, `cloud file not found or not accessible`, `documents.open() returned nothing`, `the hub keeps returning <model> vN but vM was saved` |
-| 2 | `apply_parameters` | `read_params`; `_apply_input_transforms` (`orders.input_transforms`, default: panel `cutout` "B-354 & B-386" → text `cutout_A`/`cutout_B`); add derived parameters (`orders.derived_parameters`, default `a_order_number = "{order_id}"`) not present in the order; `plan_assignments` (section 10); `apply_params` (one `design.modifyParameters` batch, per-parameter fallback, read-back verification); `yield None`; append `model_warnings` (timeline errors/warnings, max 20). | one tick | bad values, unknown parameters under `unknown_parameter_policy: fail`, any assignment whose read-back does not match |
+| 2 | `apply_parameters` | `read_params`; `_apply_input_transforms` (`orders.input_transforms`, default: panel `cutout` "B-354 & B-386" → text `cutout_A`/`cutout_B`); add derived parameters (`orders.derived_parameters`: the order number, component id and series tags) not present in the order; warn for every `orders.tag_parameters` group the model lacks; `plan_assignments` (section 10); `apply_params` (one `design.modifyParameters` batch, per-parameter fallback, read-back verification); `yield None`; append `model_warnings` (timeline errors/warnings, max 20). | one tick | bad values, unknown parameters under `unknown_parameter_policy: fail`, any assignment whose read-back does not match |
 | 3 | `save_model` (if `processing.save_model`, default true) | Refuse to save a copy older than the last saved version (`refusing to save an out-of-date copy`). `start_save(model, "NFE <order_id> <component_id>")`. Returns `None` when the document is not modified (warning `model unchanged; no new version saved`). Then wait for `save_complete`: document not modified, `dataFile.versionNumber` greater than before, `dataFile.isComplete`. Records `model_version`. | `WaitFor` "model cloud save", `save_timeout_s` = 300 | `save() returned False`, timeout |
 | 3a | `drilling` (doors, stiles) | `read_values` (recomputed values, lengths in inches) once for 3a/3b; `_drilling`: `drilling.component_drilling` with `DRILLING_DEFAULTS` + `drilling` config; every record's `ProgramName` set to the component's file stem; stored as `drilling`. | — | — |
 | 3b | `plan_toolpaths` | `_manufacture`: pick the toolpath table (`rules.resolve` over the profiles), `collect_values`, `plan` → setups (row id, note). No table → `toolpaths.result = "no toolpath table for this component"`; no setups → `"no toolpaths needed"`: steps 3c–3f are skipped (MANUFACTURE is never entered). | — | invalid tables, `no row of toolpath table ... matches` |
@@ -555,7 +556,13 @@ replaced by `-`.
 * `series_id` is skipped when the model has no such parameter (it is used for
   rule selection).
 * Derived parameter names (`orders.derived_parameters`) are silently skipped
-  when the model lacks them.
+  when the model lacks them, and not written when their value comes out empty
+  (an order without `series_id` leaves the series tag alone).
+* Tags (`orders.tag_parameters`): every model is expected to have a component
+  id, an order number and a series text parameter.  A model with none of the
+  names in a group gets the warning `model X has no tag parameter a / b`.
+  The tags that are written go through the same read-back check as every
+  other assignment.
 * Other order parameters the model does not have are "unknown": a warning
   `model X has no parameter(s): ...` by default, or a component failure with
   `processing.unknown_parameter_policy: fail`.
@@ -787,6 +794,43 @@ fails the component.
 
 ---
 
+### 12.5 Cloud reservations and blocking dialogs
+
+Fusion reserves a file in the hub when it becomes modified and releases the
+reservation after the new version is uploaded. Seen four times on 2026-10-07
+and 2026-10-08, every time on `2X86/8_Stile` (after 17, 28, 48 and 47 saves of
+that model in a row; never in 50 saves of `2X81/2_Stile` or 48 of
+`2X8X_Door`): Fusion sent a second reserve request just before the upload
+(`reserveLineage_reserveFileBeforeUpload` in Fusion's `AppLogFile*.log`), the
+server answered `DM-403.RESERVATION_RESERVE_LINEAGE_ALREADY_RESERVED`, Fusion
+aborted the upload (`[CFSUploader] Uploading aborted since file couldn't be
+reserved`) and showed a modal **Upload Error ... insufficient permissions**
+dialog. Why Fusion sends the second request is not known. The reservation is
+held by the signed-in user's own account and stays on the server for about two
+hours: restarting Fusion or closing the document does not release it, and
+every save of that file fails the same way until it expires. Other files are
+not affected.
+
+What the pipeline does about it:
+
+* `processing.model_settle_s` (default 20): before changing a model, the
+  engine waits until that many seconds have passed since the same model's
+  previous save completed. It was added on the theory that a late push
+  notification caused the failure; the 2026-10-08 failure happened with the
+  wait in place, so it does not prevent it.
+* The harness watches the Fusion process for a modal dialog
+  (`winproc.modal_dialog`: the main window is disabled and another window is
+  enabled) every sample. The title is shown on the Fusion lamp and logged.
+  Dialogs listed in `supervisor.dialog_actions` are answered (at most three
+  times each): **Upload Error** gets a click on **Open** (never **Save As**,
+  which would create a copy of the model), the **Recovered Documents** dialog
+  (window title `Fusion360`) that appears after a restart with unsaved changes
+  gets its X button. Nothing is touched before the add-in has loaded in that
+  Fusion process, so sign-in and licence dialogs are left alone.
+* The component whose upload was refused still fails on `save_timeout_s`.
+  Its model cannot be saved until the reservation is gone: hold that model's
+  orders back and continue with the others.
+
 ## 13. Configuration reference
 
 `config/config.json` is deep-merged over `nfe.config.DEFAULTS`
@@ -816,7 +860,8 @@ through `PUT /api/config`, which deep-merges over the defaults, validates
 | `orders.type_by_key` | `{"doors": "door", "stiles": "stile", "panels": "panel"}` | Top-level JSON key → component type. |
 | `orders.type_by_prefix` | `{"D": "door", "S": "stile", "P": "panel"}` | Component id letter prefix → type, for other keys. |
 | `orders.group_by_model` | `true` | Reorder components so those sharing a model run back to back. |
-| `orders.derived_parameters` | `{"a_order_number": "{order_id}"}` | Parameters filled from the order when the component does not supply them and the model has them. Placeholders `{order_id}`, `{component_id}`, `{type}`, `{series_id}`. Written as text. |
+| `orders.derived_parameters` | `a_order_number` and `order_number` = `{order_id}`; `component_id` = `1-{component_id}-{order_id}`; `a_series` and `series` = `{series_id}` | Parameters filled from the order when the component does not supply them and the model has them (the 2X stile models say `order_number` / `series`, the others `a_order_number` / `a_series`). Placeholders `{order_id}`, `{component_id}`, `{type}`, `{series_id}`. Written as text; an empty value is not written. |
+| `orders.tag_parameters` | `[["component_id"], ["a_order_number", "order_number"], ["a_series", "series"]]` | Tag parameters every model should have. A component whose model has none of the names in a group gets a warning. |
 | `orders.input_transforms` | panel `split_text`: `cutout` → `cutout_A`, `cutout_B` on `&` or `+` | Order values reshaped before they are applied; the targets are always written (empty when absent) so a previous panel's cutout never lingers. |
 
 ### `naming`
@@ -891,6 +936,7 @@ stile_3086 1/4), `y_param` (`hinge_hole_x_dist`).
 | `processing.save_timeout_s` | `300` | Timeout for model and drawing cloud saves. |
 | `processing.drawing_update_timeout_s` | `180` | Timeout for the drawing to reference the new model version. |
 | `processing.drawing_settle_s` | `2.0` | Sleep after opening the drawing and after its references are up to date. |
+| `processing.model_settle_s` | `20.0` | Minimum time between a model's save completing and the next change to the same model (section 12.5). `0` = no wait. |
 | `processing.export_timeout_s` | `300` | Timeout for the PDF file to appear. |
 | `processing.step_stuck_timeout_s` | `900` | Harness restarts Fusion when one tick (`ui_blocked_s`) blocks longer than this. |
 
@@ -910,6 +956,8 @@ stile_3086 1/4), `y_param` (`hinge_hole_x_dist`).
 | `supervisor.auto_restart_fusion` | `true` | Allow the harness to restart Fusion automatically. |
 | `supervisor.heartbeat_stale_s` | `60` | Heartbeat age treated as a hang; also the dashboard's "add-in online" threshold. |
 | `supervisor.restart_cooldown_s` | `300` | Minimum time between automatic restarts (from the end of the previous one). |
+| `supervisor.dismiss_dialogs` | `true` | Answer the Fusion dialogs listed in `dialog_actions` (section 12.5). |
+| `supervisor.dialog_actions` | `Upload Error` → click at 0.912, 0.8125 (the Open button); `Fusion360` → close | One entry per dialog window title: `{"title", "action": "click" | "close", "x", "y"}` with x, y as fractions of the dialog's width and height. |
 | `supervisor.fusion_launcher` | `""` | Path to `FusionLauncher.exe`; blank = auto-detect. |
 
 ### `api`
@@ -939,6 +987,11 @@ two levels above the add-in folder if it has a `config/` folder, else
 ## 14. File formats
 
 ### 14.1 Order JSON (input)
+
+An optional top-level `"drawing_test": "<folder>"` (written by the Scenarios
+tab) makes the add-in also copy the order's drawing PDFs into
+`drawing_test/<folder>/` under the project root; the report lists the copies
+under `outputs.drawing_test`.
 
 ```json
 {
@@ -1113,6 +1166,10 @@ Data:
 | PUT | `/api/config` | full config object | Merged, validated (400 with the validation messages), saved config. Then tells the add-in `reload_config` (ignored if offline). |
 | POST | `/api/orders/preview` | `{content: <JSON text or object>}` | `{order_id, counts, components: [{component_id, type, series_id, family, rule_id, model, drawing}]}`; 400 for invalid orders. |
 | POST | `/api/orders/upload` | `{name, content}` | `{name, components}`; the file name is sanitised with `safe_name`; an existing name gets a `_HHMMSS` suffix. 400 for invalid orders. |
+| GET | `/api/scenarios` | — | `{sheets: [{name, title, total, drawings}], folder}`: the CSV sheets in `scenarios/`. |
+| GET | `/api/scenarios/rows?sheet=<name>` | — | `{name, title, columns, rows: [[number, scenario, order_id, drawing_required, series_id, label]]}`. 404 for an unknown sheet. |
+| POST | `/api/scenarios/upload` | `{name, content: <CSV text>}` | `{name, total}`; saved under `scenarios/`. 400 when it is not a scenario sheet. |
+| POST | `/api/scenarios/generate` | `{sheet, mode: drawings|selection, selection: "7, 120-135"}` | `{queued, skipped, drawing_test}`: one order per scenario written to the inbox as `<order_id>.json`; a scenario already in the inbox or being processed is skipped. 409 in remote mode (the inbox is a network share). |
 | POST | `/api/orders/requeue` | `{folder: done|failed, name}` | `{name}` (the inbox name). 404 if missing. |
 | POST | `/api/orders/remove` | `{name}` | `{ok: true}`; deletes an inbox file. |
 | POST | `/api/config/suggest` | — | `{suggestions: [rule...], scanned_files}`; reads the family folders through the add-in. |

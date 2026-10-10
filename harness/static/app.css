@@ -389,3 +389,9 @@ table.logic tr.hit td:first-child { box-shadow: inset 3px 0 0 var(--dykem); }
 .setup-chip b { color: var(--dykem); }
 .chips-inline { display: flex; flex-wrap: wrap; gap: 4px; }
 #logic-body .seg { flex-wrap: wrap; }
+
+/* scenarios */
+.scn-wrap { max-height: 60vh; overflow-y: auto; }
+#scn-table td, #scn-table th { white-space: nowrap; }
+#scn-table td.label { white-space: normal; min-width: 280px; }
+#scn-table tr.sel { background: color-mix(in srgb, var(--dykem) 10%, transparent); }

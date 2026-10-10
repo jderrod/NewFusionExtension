@@ -4,6 +4,7 @@ Order format (values may be wrapped as ``[value, "type", "description"]``)::
 
     {
       "order_id": ["3X8X_DV_0622", "string", "..."],
+      "drawing_test": "2X8X Door",        (optional, see harness/scenarios.py)
       "doors":  [{"id": ["D1", "string", "..."], "parameters": {...}}, ...],
       "stiles": [...],
       "panels": [...]
@@ -64,10 +65,11 @@ class Component(object):
 
 
 class Order(object):
-    def __init__(self, order_id, components, source_name=""):
+    def __init__(self, order_id, components, source_name="", drawing_test=""):
         self.order_id = order_id
         self.components = components
         self.source_name = source_name
+        self.drawing_test = drawing_test      # folder under drawing_test/ that collects the PDFs
 
     @property
     def safe_id(self):
@@ -159,7 +161,9 @@ def parse_order(data, source_name="", type_by_key=None, type_by_prefix=None):
 
     if not components:
         raise OrderError("order contains no components")
-    return Order(order_id, components, source_name)
+    drawing_test = _scalar(data.get("drawing_test"))
+    return Order(order_id, components, source_name,
+                 drawing_test=str(drawing_test).strip() if isinstance(drawing_test, str) else "")
 
 
 def load_order_file(path, **kw):

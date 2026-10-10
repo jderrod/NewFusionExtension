@@ -94,6 +94,7 @@
     document.querySelectorAll("section.view").forEach((s) => { s.hidden = s.id !== "view-" + v; });
     try { localStorage.setItem("nfe.view", v); } catch (e) { /* ignore */ }
     if (v === "orders") loadOrders();
+    if (v === "scenarios") loadScenarios();
     if (v === "series") loadSeries();
     if (v === "settings") loadSettings();
     if (v === "log") renderLog();
@@ -135,6 +136,10 @@
     if (f.running) {
       lf.dataset.s = "good";
       $("fusion-text").textContent = "running · " + fmtInt(f.threads) + " threads · " + fmtInt(f.working_set_mb) + " MB";
+      if (f.dialog !== null && f.dialog !== undefined) {      // a dialog is waiting for a click
+        lf.dataset.s = "warning";
+        $("fusion-text").textContent = "waiting on a dialog: " + (f.dialog || "untitled");
+      }
     } else {
       lf.dataset.s = "critical";
       $("fusion-text").textContent = "not running";
@@ -424,6 +429,135 @@
   $("btn-cancel").addEventListener("click", async () => { if (await control("cancel")) toast("The order stops after the current component"); });
   $("auto-restart").addEventListener("change", async (e) => {
     if (await control("auto_restart", { enabled: e.target.checked })) toast(e.target.checked ? "Fusion restarts automatically" : "Automatic restarts off");
+  });
+
+  // ------------------------------------------------------------------ scenarios
+  const SCN = { sheets: [], sheet: null, rows: [], selected: new Set(), shown: [] };
+  const SCN_PAGE = 300;      // rows drawn at once; search or the range box reaches the rest
+
+  async function loadScenarios(keep) {
+    let data;
+    try { data = await api("GET", "/api/scenarios"); }
+    catch (e) { toast(e.message, true); return; }
+    SCN.sheets = data.sheets;
+    const sel = $("scn-sheet");
+    sel.replaceChildren(...data.sheets.map((s) => el("option", { value: s.name, text: s.error ? s.title + " (unreadable)" : s.title + " · " + s.total + " scenarios" })));
+    if (!data.sheets.length) {
+      SCN.sheet = null; SCN.rows = [];
+      $("scn-status").textContent = "";
+      $("scn-table").replaceChildren(el("tbody", null, el("tr", null, el("td", { class: "empty", text: "No sheets yet. Add the ValidationScenarios tab of a workbook, saved as CSV." }))));
+      updateScnButtons();
+      return;
+    }
+    const has = (n) => data.sheets.some((s) => s.name === n);
+    const want = keep && has(keep) ? keep : (has(SCN.sheet) ? SCN.sheet : data.sheets[0].name);
+    sel.value = want;
+    if (want !== SCN.sheet || keep) await openSheet(want);
+  }
+
+  async function openSheet(name) {
+    SCN.sheet = name; SCN.rows = []; SCN.selected = new Set();
+    try {
+      const data = await api("GET", "/api/scenarios/rows?sheet=" + encodeURIComponent(name));
+      SCN.rows = data.rows.map((r) => ({ n: r[0], scenario: r[1], order: r[2], drawing: r[3], series: r[4], label: r[5] }));
+    } catch (e) { toast(e.message, true); }
+    renderScenarios();
+  }
+
+  function renderScenarios() {
+    const q = $("scn-search").value.trim().toLowerCase();
+    const only = $("scn-only-drawings").checked;
+    SCN.shown = SCN.rows.filter((r) => (!only || r.drawing) &&
+      (!q || (r.scenario + " " + r.order + " " + r.series + " " + r.label).toLowerCase().includes(q)));
+    const tb = el("tbody");
+    SCN.shown.slice(0, SCN_PAGE).forEach((r) => {
+      const cb = el("input", { type: "checkbox", "aria-label": "Select " + r.order });
+      cb.checked = SCN.selected.has(r.n);
+      const tr = el("tr", { class: cb.checked ? "sel" : null },
+        el("td", null, cb), el("td", { class: "mono", text: r.scenario }), el("td", { class: "mono", text: r.order }),
+        el("td", null, r.drawing ? pill("ok", "Yes") : el("span", { class: "muted", text: "No" })),
+        el("td", { class: "mono", text: r.series }), el("td", { class: "label", text: r.label }));
+      cb.addEventListener("change", () => {
+        if (cb.checked) SCN.selected.add(r.n); else SCN.selected.delete(r.n);
+        tr.className = cb.checked ? "sel" : "";
+        updateScnButtons();
+      });
+      tb.appendChild(tr);
+    });
+    if (!SCN.shown.length) tb.appendChild(el("tr", null, el("td", { class: "empty", colspan: "6", text: "No scenario matches." })));
+    $("scn-table").replaceChildren(el("thead", null, el("tr", null, ...["", "Scenario", "Order ID", "Drawing required", "Series", "Description"].map((h) => el("th", { text: h })))), tb);
+    const more = SCN.shown.length > SCN_PAGE ? " Showing the first " + SCN_PAGE + "." : "";
+    $("scn-status").textContent = SCN.shown.length.toLocaleString() + " of " + SCN.rows.length.toLocaleString() + " scenarios match." + more;
+    updateScnButtons();
+  }
+
+  function updateScnButtons() {
+    const drawings = SCN.rows.filter((r) => r.drawing).length;
+    $("scn-all-drawings").textContent = "Queue all drawing-required (" + drawings + ")";
+    $("scn-all-drawings").disabled = !drawings;
+    $("scn-queue").textContent = "Queue selected (" + SCN.selected.size + ")";
+    $("scn-queue").disabled = !SCN.selected.size;
+  }
+
+  // "7, 120-135" -> scenario numbers; ids (2X86-0400, 2X8X_SV_0400) match too
+  function parseScnRange(text) {
+    const byId = new Map();
+    SCN.rows.forEach((r) => { byId.set(r.scenario.toUpperCase(), r.n); byId.set(r.order.toUpperCase(), r.n); });
+    const have = new Set(SCN.rows.map((r) => r.n));
+    const out = [], bad = [];
+    text.split(/[,;\s]+/).filter(Boolean).forEach((part) => {
+      const m = /^(\d+)(?:-(\d+))?$/.exec(part);
+      if (m) {
+        const a = +m[1], b = +(m[2] || m[1]);
+        let hit = false;
+        for (let n = a; n <= b && b - a <= 100000; n++) if (have.has(n)) { out.push(n); hit = true; }
+        if (!hit) bad.push(part);
+      } else if (byId.has(part.toUpperCase())) out.push(byId.get(part.toUpperCase()));
+      else bad.push(part);
+    });
+    return { out, bad };
+  }
+
+  async function queueScenarios(mode, btn) {
+    const count = mode === "drawings" ? SCN.rows.filter((r) => r.drawing).length : SCN.selected.size;
+    const sheet = SCN.sheets.find((s) => s.name === SCN.sheet);
+    if (!count || !sheet) return;
+    if (!confirm("Queue " + count + " order(s) from " + sheet.title + "? Fusion processes each one and saves a new model version.")) return;
+    btn.disabled = true;
+    try {
+      const res = await api("POST", "/api/scenarios/generate", {
+        sheet: SCN.sheet, mode, selection: mode === "drawings" ? "" : [...SCN.selected].sort((a, b) => a - b).join(","),
+      });
+      toast(res.queued.length + " order(s) queued" + (res.skipped.length ? ", " + res.skipped.length + " already waiting" : "") +
+        ". Drawings collect in drawing_test/" + res.drawing_test.replace(/[^\w.\-]+/g, "_"));
+    } catch (e) { toast(e.message, true); }
+    updateScnButtons();
+  }
+
+  $("scn-sheet").addEventListener("change", (e) => openSheet(e.target.value));
+  $("scn-search").addEventListener("input", renderScenarios);
+  $("scn-only-drawings").addEventListener("change", renderScenarios);
+  $("scn-add-range").addEventListener("click", () => {
+    const { out, bad } = parseScnRange($("scn-range").value);
+    out.forEach((n) => SCN.selected.add(n));
+    if (bad.length) toast("Not in this sheet: " + bad.slice(0, 5).join(", "), true);
+    else if (out.length) { $("scn-range").value = ""; toast(out.length + " scenario(s) selected"); }
+    renderScenarios();
+  });
+  $("scn-range").addEventListener("keydown", (e) => { if (e.key === "Enter") $("scn-add-range").click(); });
+  $("scn-select-shown").addEventListener("click", () => { SCN.shown.forEach((r) => SCN.selected.add(r.n)); renderScenarios(); });
+  $("scn-clear").addEventListener("click", () => { SCN.selected = new Set(); renderScenarios(); });
+  $("scn-all-drawings").addEventListener("click", (e) => queueScenarios("drawings", e.currentTarget));
+  $("scn-queue").addEventListener("click", (e) => queueScenarios("selection", e.currentTarget));
+  $("scn-file").addEventListener("change", async (e) => {
+    const f = e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    try {
+      const res = await api("POST", "/api/scenarios/upload", { name: f.name, content: await f.text() });
+      toast(res.name + " added: " + res.total + " scenarios");
+      loadScenarios(res.name);
+    } catch (err) { toast(err.message, true); }
   });
 
   // ------------------------------------------------------------------ orders
@@ -824,6 +958,7 @@
     ["processing.drawing_update_timeout_s", "num", "Drawing update timeout (s)"],
     ["processing.export_timeout_s", "num", "PDF export timeout (s)"],
     ["processing.drawing_settle_s", "num", "Pause after opening / updating a drawing (s)"],
+    ["processing.model_settle_s", "num", "Minimum time between saving a model and changing it again (s)"],
     ["processing.step_stuck_timeout_s", "num", "Restart Fusion when one step blocks longer than (s)"],
     ["health.max_threads", "int", "Restart Fusion above this many threads"],
     ["health.max_working_set_mb", "int", "Restart Fusion above this much memory (MB)"],
@@ -832,6 +967,7 @@
     ["supervisor.auto_restart_fusion", "bool", "Let the harness restart Fusion when needed"],
     ["supervisor.heartbeat_stale_s", "num", "Treat the add-in as hung after this many silent seconds"],
     ["supervisor.restart_cooldown_s", "num", "Minimum time between automatic restarts (s)"],
+    ["supervisor.dismiss_dialogs", "bool", "Answer the known Fusion dialogs automatically (upload error, recovered documents)"],
     ["paths.dropbox", "text", "Dropbox folder (blank = project dropbox/)"],
     ["paths.output", "text", "PDF output folder (blank = project output/)"],
   ];
@@ -1292,7 +1428,7 @@
   }
 
   // ------------------------------------------------------------------ boot
-  const VIEWS = ["monitor", "orders", "series", "logic", "settings", "log", "docs"];
+  const VIEWS = ["monitor", "orders", "scenarios", "series", "logic", "settings", "log", "docs"];
   let initial = "monitor";
   try { initial = localStorage.getItem("nfe.view") || "monitor"; } catch (e) { /* ignore */ }
   if (VIEWS.includes(location.hash.slice(1))) initial = location.hash.slice(1);

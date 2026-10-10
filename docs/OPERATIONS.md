@@ -125,6 +125,31 @@ harness, but then nobody restarts Fusion after a crash or a health request.
     **Run again** (moves the order back to the inbox and deletes its report).
   * Clicking a row opens the report (section 8).
 
+### 4.3a Scenarios
+
+Turns rows of a validation-scenario sheet into orders.
+
+* **Sheets** live in `scenarios/` as CSV: the *ValidationScenarios* tab of an
+  inputs & outputs workbook, saved as CSV. **Add sheet (CSV)** uploads one.
+  The part of the file name before " inputs" is the sheet title
+  (`2X8X Door`, `2X86 and 2X88 Stile`).
+* **Queue all drawing-required (n)** queues every scenario whose
+  *Drawing required?* column says Yes.
+* To pick scenarios: tick rows, or type numbers, ranges or ids
+  (`7, 120-135, 2X86-0400`) and press **Select**. **Select all shown** takes
+  everything matching the search box and the *Drawing required only* filter.
+  **Queue selected (n)** queues them. The table draws the first 300 matching
+  rows; the search box and the range box reach the rest.
+* Each scenario becomes one order in the inbox: `2X8X_SV_0007` on a row with
+  Series `2X86` is order `2X86-0007`, with `series_id` `2X86` (or `2X86G` when
+  the Gapless column says G). The two stile sheets reuse the same scenario
+  numbers; the series keeps their orders apart.
+* Besides the normal run folder, every drawing PDF of these orders is copied to
+  `drawing_test/<sheet title>/` (`drawing_test/2X8X_Door/1-D1-2X8X-0001-drawing.pdf`),
+  one folder per sheet. Running a scenario again replaces its PDF there.
+* A scenario that is already waiting in the inbox is not queued twice.
+  Queuing is refused in remote mode, where the inbox is a network share.
+
 ### 4.4 Series & drawings
 
 * **Rules table**: one row per rule with **On**, **Type** (door, stile,
@@ -180,12 +205,14 @@ add-in re-reads the configuration at the start of every order.
 | Close every document after this many components | `processing.recycle_every_components` |
 | Cloud save / drawing update / PDF export timeouts | `processing.save_timeout_s`, `drawing_update_timeout_s`, `export_timeout_s` |
 | Pause after opening / updating a drawing | `processing.drawing_settle_s` |
+| Minimum time between saving a model and changing it again | `processing.model_settle_s` |
 | Restart Fusion when one step blocks longer than | `processing.step_stuck_timeout_s` |
 | Restart Fusion above threads / memory / open documents | `health.max_threads`, `max_working_set_mb`, `max_open_documents` |
 | Refresh Fusion after this many components | `health.restart_every_components` |
 | Let the harness restart Fusion | `supervisor.auto_restart_fusion` |
 | Treat the add-in as hung after | `supervisor.heartbeat_stale_s` |
 | Minimum time between automatic restarts | `supervisor.restart_cooldown_s` |
+| Answer the known Fusion dialogs automatically | `supervisor.dismiss_dialogs` |
 | Dropbox folder / PDF output folder | `paths.dropbox`, `paths.output` |
 
 Keys not on the form (edit `config/config.json` directly; the full list is in
@@ -255,8 +282,9 @@ ARCHITECTURE.md section 9.
 * Order format: see ARCHITECTURE.md section 14.1. Components can be listed
   under `doors`, `stiles`, `panels` (or any other key; the type then comes
   from the id prefix `D`/`S`/`P`). Parameter names must match the model's
-  parameter names. `series_id` chooses the rule. `a_order_number` is filled
-  with the order id automatically if the model has it.
+  parameter names. `series_id` chooses the rule. The tags are filled
+  automatically: the order number, the component id (`1-D1-<order id>`) and
+  the series (the order's `series_id`).
 
 ---
 
@@ -375,6 +403,23 @@ Common warnings:
 Failed components never stop the order; the others continue. A component
 that failed leaves its model closed without saving, so the next component
 starts from the saved state in the hub.
+
+### 9.3-1 "Upload Error ... insufficient permissions" / save times out
+
+* The Fusion lamp reads `waiting on a dialog: Upload Error`, and the component
+  fails with `timed out after 300s waiting for model cloud save`.
+* This is not a permission problem. The model is still *reserved* in the hub
+  from an earlier save, and the server refuses a second reservation
+  (ARCHITECTURE section 12.5). Fusion's own log
+  (`%LOCALAPPDATA%\Autodesk\Autodesk Fusion 360\<id>\logs\AppLogFile*.log`)
+  shows `RESERVATION_RESERVE_LINEAGE_ALREADY_RESERVED`.
+* The harness presses **Open** on the dialog by itself. Do not press
+  **Save As**: it creates a copy of the model in the project.
+* Only that one model is affected, and restarting Fusion does not help. Pause,
+  move that model's orders out of `dropbox/inbox`, resume for the others, and
+  put them back when the reservation is gone (it expired within about two
+  hours when this was seen). Signing in to Fusion on another computer ends the
+  session on this one.
 
 ### 9.3a Toolpaths, posting and drilling
 

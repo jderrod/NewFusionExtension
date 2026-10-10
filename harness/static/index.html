@@ -29,6 +29,7 @@
   <nav class="tabs" role="tablist">
     <button role="tab" aria-selected="true" data-view="monitor">Monitor</button>
     <button role="tab" aria-selected="false" data-view="orders">Orders</button>
+    <button role="tab" aria-selected="false" data-view="scenarios">Scenarios</button>
     <button role="tab" aria-selected="false" data-view="series">Series &amp; drawings</button>
     <button role="tab" aria-selected="false" data-view="logic">Logic tables</button>
     <button role="tab" aria-selected="false" data-view="settings">Settings</button>
@@ -95,6 +96,33 @@
       </div>
     </div>
     <div class="card" id="report" hidden></div>
+  </section>
+
+  <!-- ================= SCENARIOS ================= -->
+  <section class="view" id="view-scenarios" hidden>
+    <div class="card">
+      <h2>Orders from validation scenarios<span class="sub">One order per scenario goes to the inbox. Drawing PDFs are also collected in drawing_test/&lt;sheet&gt;/.</span></h2>
+      <div class="row" style="margin-bottom:10px">
+        <select id="scn-sheet" aria-label="Sheet"></select>
+        <label class="btn" for="scn-file">Add sheet (CSV)</label>
+        <input type="file" id="scn-file" accept=".csv" hidden>
+        <span class="spacer" style="flex:1"></span>
+        <button class="btn primary" id="scn-all-drawings" type="button" disabled>Queue all drawing-required</button>
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        <input type="text" id="scn-search" placeholder="Search id, series or label" style="flex:1;min-width:200px">
+        <label><input type="checkbox" id="scn-only-drawings"> Drawing required only</label>
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        <input type="text" id="scn-range" placeholder="Numbers and ranges, e.g. 7, 120-135" style="flex:1;min-width:200px">
+        <button class="btn" id="scn-add-range" type="button">Select</button>
+        <button class="btn" id="scn-select-shown" type="button">Select all shown</button>
+        <button class="btn" id="scn-clear" type="button">Clear</button>
+        <button class="btn primary" id="scn-queue" type="button" disabled>Queue selected (0)</button>
+      </div>
+      <div class="muted" id="scn-status" style="margin-bottom:6px"></div>
+      <div class="table-wrap scn-wrap"><table id="scn-table"></table></div>
+    </div>
   </section>
 
   <!-- ================= SERIES ================= -->

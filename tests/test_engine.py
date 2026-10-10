@@ -358,5 +358,32 @@ class EngineFlow(unittest.TestCase):
         self.assertEqual(out["v"], threading.current_thread().name)
 
 
+
+class ModelSettle(unittest.TestCase):
+    def tearDown(self):
+        self.sb.cleanup()
+
+    def gap(self, settle):
+        """Seconds between D1's save completing and D2's parameters being applied."""
+        self.sb = Sandbox(processing={"model_settle_s": settle})
+        self.sb.drop("two.json", order(doors=2))
+        eng = self.sb.make_engine(FakeOps(helpers.standard_files()))
+        eng.set_inbox_hint(True)
+        self.sb.run(eng)
+        rep = report_for(self.sb, "done", "two.json")
+        self.assertEqual(rep["summary"]["status"], "ok", rep)
+        d1, d2 = rep["components"]
+        after_save = sum(s["duration_s"] for s in d1["steps"][3:])
+        return after_save + d2["steps"][0]["duration_s"] + d2["steps"][1]["duration_s"]
+
+    def test_same_model_is_not_changed_again_before_the_settle_time(self):
+        """Two doors on one model with `processing.model_settle_s` = 60: D2's
+        parameters are applied at least 60 s after D1's save completed (the wait
+        is spent in D2's `apply_parameters` step). With 0 there is no wait."""
+        self.assertGreaterEqual(self.gap(60), 60)
+        self.sb.cleanup()
+        self.assertLess(self.gap(0), 30)
+
+
 if __name__ == "__main__":
     unittest.main()

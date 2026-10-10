@@ -247,5 +247,62 @@ class SupervisorPolicy(unittest.TestCase):
         self.assertIsNone(self.h.check_policies())
 
 
+
+class FusionDialogs(unittest.TestCase):
+    def setUp(self):
+        self.sb = Sandbox()
+        self.h = server.Harness(root=self.sb.root, fusion_exe="nfe_no_such_process.exe",
+                                launch_fn=lambda: None, kill_fn=lambda pid: None)
+        self.h.fusion = {"running": True, "pid": 4242}
+        self.closed, self.clicked = [], []
+
+    def tearDown(self):
+        self.h.close()
+        self.sb.cleanup()
+
+    def check(self, dialog):
+        return self.h.check_dialogs(find=lambda pid: dialog, close=self.closed.append,
+                                    click=lambda hwnd, x, y: self.clicked.append((hwnd, round(x), round(y))))
+
+    def addin_loaded(self, pid=4242):
+        write_json_atomic(self.sb.paths.status_file, {"state": "processing", "addin_pid": pid,
+                                                      "heartbeat_at": time.time()})
+
+    def test_upload_error_is_answered_with_open(self):
+        """With the add-in loaded in the Fusion process, an `Upload Error` dialog of
+        500x176 is clicked at (456, 143) - the `Open` button, not `Save As` - and the
+        overview reports `fusion.dialog`. The same dialog is answered at most three
+        times; when it is gone the overview clears."""
+        self.addin_loaded()
+        dlg = {"hwnd": 77, "title": "Upload Error", "width": 500, "height": 176}
+        self.assertEqual(self.check(dlg)["action"], "click")
+        self.assertEqual(self.clicked, [(77, 456, 143)])
+        self.assertEqual(self.h.overview()["fusion"]["dialog"], "Upload Error")
+        for _ in range(5):
+            self.check(dlg)
+        self.assertEqual(len(self.clicked), 3)
+        self.check(None)
+        self.assertIsNone(self.h.overview()["fusion"]["dialog"])
+
+    def test_recovered_documents_is_closed_and_unknown_dialogs_are_left(self):
+        """The untitled-by-Fusion `Fusion360` dialog (Recovered Documents) gets the X
+        button. A dialog with an unlisted title is only reported. Nothing is touched
+        before the add-in has loaded in that Fusion process (sign-in, licence), or
+        when `supervisor.dismiss_dialogs` is off."""
+        dlg = {"hwnd": 5, "title": "Fusion360", "width": 580, "height": 420}
+        self.assertIsNone(self.check(dlg))                 # add-in not loaded yet
+        self.addin_loaded(pid=1)                           # loaded in an older Fusion process
+        self.assertIsNone(self.check(dlg))
+        self.assertEqual(self.closed, [])
+        self.addin_loaded()
+        self.assertEqual(self.check(dlg)["action"], "close")
+        self.assertEqual(self.closed, [5])
+        self.assertIsNone(self.check({"hwnd": 6, "title": "Something else", "width": 300, "height": 200}))
+        self.assertEqual(self.h.overview()["fusion"]["dialog"], "Something else")
+        self.h.cfg["supervisor"]["dismiss_dialogs"] = False
+        self.assertIsNone(self.check({"hwnd": 8, "title": "Upload Error", "width": 500, "height": 176}))
+        self.assertEqual((self.closed, self.clicked), ([5], []))
+
+
 if __name__ == "__main__":
     unittest.main()

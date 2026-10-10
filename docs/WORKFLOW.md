@@ -96,7 +96,7 @@ flowchart TD
     m1["open_model<br/>cached model alive and unmodified? reuse<br/>else fresh file lookup + open"]
     m2{"Opened version older than<br/>the version we last saved?"}
     m3["Stale version guard: close, wait 5·n s,<br/>look up again, reopen (max 4)"]
-    p1["apply_parameters<br/>input transforms (cutout → cutout_A/B), derived a_order_number<br/>modifyParameters batch + read-back verify"]
+    p1["apply_parameters<br/>input transforms (cutout → cutout_A/B), derived tags (order number, component id, series)<br/>modifyParameters batch + read-back verify"]
     s1{"save_model:<br/>document modified?"}
     s2{{"WaitFor model cloud save<br/>version &gt; previous, isComplete<br/>save_timeout_s = 300"}}
     v1["Read recomputed model values<br/>(lengths in inches)"]

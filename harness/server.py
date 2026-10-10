@@ -31,6 +31,8 @@ from urllib.parse import parse_qs, unquote, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "addin", "NewFusionExtension"))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
 
 from nfe import VERSION, winproc  # noqa: E402
 from nfe import config as config_mod  # noqa: E402
@@ -40,6 +42,8 @@ from nfe.jsonio import read_json, write_json_atomic  # noqa: E402
 from nfe.orders import OrderError, parse_order, safe_name  # noqa: E402
 from nfe.paths import Paths  # noqa: E402
 from nfe.state import read_events_file  # noqa: E402
+
+import scenarios as scenarios_mod  # noqa: E402
 
 FUSION_EXE = "Fusion360.exe"
 SAMPLE_S = 5.0
@@ -69,6 +73,9 @@ class Harness(object):
         self.history = collections.deque(maxlen=HISTORY_POINTS)
         self.events = collections.deque(maxlen=500)
         self._seq = 0
+        self._sheet_cache = {}
+        self.dialog = None                 # the dialog blocking Fusion, if any
+        self._dialog_tries = {}            # hwnd -> times we answered it
         self._lock = threading.RLock()
         self._stop = threading.Event()
         self.fusion = {"running": False}
@@ -226,6 +233,7 @@ class Harness(object):
         while not self._stop.wait(SAMPLE_S):
             try:
                 self.sample_once()
+                self.check_dialogs()
                 self.check_policies()
             except Exception:
                 self.log.exception("supervisor")
@@ -260,6 +268,37 @@ class Harness(object):
             self.event("warn" if st.get("state") != "stopped" else "info",
                        "Fusion process exited (add-in state: %s)" % st.get("state"))
         return point
+
+    def check_dialogs(self, find=None, close=None, click=None):
+        """Notice a dialog that is blocking Fusion and answer the known ones
+        (supervisor.dialog_actions).  Only once the add-in has loaded in this
+        Fusion process, so sign-in and licence dialogs are never touched."""
+        pid = self.fusion.get("pid") if self.fusion.get("running") else None
+        dlg = (find or winproc.modal_dialog)(pid) if pid else None
+        if not dlg:
+            self.dialog = None
+            self._dialog_tries.clear()
+            return None
+        known = (self.dialog or {}).get("hwnd") == dlg["hwnd"]
+        self.dialog = {"hwnd": dlg["hwnd"], "title": dlg["title"],
+                       "since": self.dialog["since"] if known else time.time()}
+        if not known:
+            self.event("warn", "Fusion is showing a dialog: %s" % (dlg["title"] or "(untitled)"))
+        sup = self.cfg.get("supervisor", {})
+        if not sup.get("dismiss_dialogs", True) or self.addin_status().get("addin_pid") != pid:
+            return None
+        rule = next((r for r in sup.get("dialog_actions") or [] if r.get("title") == dlg["title"]), None)
+        tries = self._dialog_tries.get(dlg["hwnd"], 0)
+        if rule is None or tries >= 3:
+            return None
+        self._dialog_tries[dlg["hwnd"]] = tries + 1
+        if rule.get("action") == "click":
+            (click or winproc.click_window)(dlg["hwnd"], dlg["width"] * float(rule.get("x", 0.5)),
+                                            dlg["height"] * float(rule.get("y", 0.5)))
+        else:
+            (close or winproc.close_window)(dlg["hwnd"])
+        self.event("warn", "Answered Fusion dialog %r (%s)" % (dlg["title"], rule.get("action")))
+        return rule
 
     def heartbeat_age(self):
         st = self.addin_status()
@@ -371,7 +410,7 @@ class Harness(object):
         counts["failed"] = _count_orders(self.paths.failed)
         return {
             "now": time.time(), "harness_version": VERSION,
-            "fusion": self.fusion,
+            "fusion": dict(self.fusion, dialog=(self.dialog or {}).get("title") if self.dialog else None),
             "addin": {"online": online, "heartbeat_age_s": None if age is None else round(age, 1),
                       "status": st},
             "queue": counts,
@@ -454,6 +493,90 @@ class Harness(object):
         self.event("info", "Order uploaded to inbox: %s (%d components)" % (
             os.path.basename(dst), len(order.components)))
         return {"name": os.path.basename(dst), "components": len(order.components)}
+
+    # ---- validation-scenario sheets (scenarios/*.csv) ----
+    @property
+    def scenarios_dir(self):
+        return os.path.join(self.root, "scenarios")
+
+    def _sheet(self, name):
+        name = os.path.basename(str(name or ""))
+        path = os.path.join(self.scenarios_dir, name)
+        if not name.lower().endswith(".csv") or not os.path.isfile(path):
+            raise HttpError(404, "no such sheet %r" % name)
+        key = (path, os.path.getmtime(path))
+        with self._lock:
+            cache = self._sheet_cache
+            if cache.get("key") != key:
+                try:
+                    cache.update(key=key, sheet=scenarios_mod.load_sheet(path))
+                except (scenarios_mod.SheetError, OSError) as e:
+                    raise HttpError(400, "%s: %s" % (name, e))
+            return cache["sheet"]
+
+    def scenario_sheets(self):
+        out = []
+        if os.path.isdir(self.scenarios_dir):
+            for name in sorted(os.listdir(self.scenarios_dir)):
+                if not name.lower().endswith(".csv"):
+                    continue
+                item = {"name": name, "title": scenarios_mod.sheet_title(name)}
+                try:
+                    rows = self._sheet(name)["rows"]
+                    item.update(total=len(rows), drawings=sum(1 for r in rows if r["drawing"]))
+                except HttpError as e:
+                    item["error"] = str(e)
+                out.append(item)
+        return {"sheets": out, "folder": self.scenarios_dir}
+
+    def scenario_rows(self, name):
+        sheet = self._sheet(name)
+        return {"name": os.path.basename(name), "title": sheet["title"], "columns": sheet["columns"],
+                "rows": [[r["n"], r["scenario"], r["order_id"], r["drawing"], r["series_id"], r["label"]]
+                         for r in sheet["rows"]]}
+
+    def scenario_upload(self, name, content):
+        # keep the spaces: the sheet title (and the drawing_test folder) comes from the name
+        name = os.path.splitext(os.path.basename(str(name or "")))[0]
+        name = "".join("_" if ch in '\\/:*?"<>|' or ord(ch) < 32 else ch for ch in name).strip(" .")[:150] or "sheet"
+        if not isinstance(content, str) or not content.strip():
+            raise HttpError(400, "the sheet is empty")
+        try:
+            sheet = scenarios_mod.parse_sheet(content, name + ".csv")
+        except scenarios_mod.SheetError as e:
+            raise HttpError(400, str(e))
+        os.makedirs(self.scenarios_dir, exist_ok=True)
+        dst = os.path.join(self.scenarios_dir, name + ".csv")
+        with open(dst + ".uploading", "w", encoding="utf-8", newline="") as fh:
+            fh.write(content)
+        os.replace(dst + ".uploading", dst)
+        self.event("info", "Scenario sheet saved: %s (%d scenarios)" % (name + ".csv", len(sheet["rows"])))
+        return {"name": name + ".csv", "total": len(sheet["rows"])}
+
+    def scenario_generate(self, name, mode, selection=""):
+        """Write one order per selected scenario to the inbox."""
+        sheet = self._sheet(name)
+        try:
+            rows = scenarios_mod.select_rows(sheet, mode, selection)
+        except scenarios_mod.SheetError as e:
+            raise HttpError(400, str(e))
+        if not getattr(self.paths, "inbox_is_local", True):
+            raise HttpError(409, "the inbox is a network share (remote mode); switch to local to queue scenarios")
+        queued, skipped = [], []
+        with self._lock:
+            for r in rows:
+                fname = safe_name(r["order_id"]) + ".json"
+                dst = os.path.join(self.paths.inbox, fname)
+                if os.path.exists(dst) or os.path.exists(os.path.join(self.paths.processing, fname)):
+                    skipped.append(r["order_id"])
+                    continue
+                with open(dst + ".uploading", "w", encoding="utf-8") as fh:
+                    json.dump(scenarios_mod.build_order(sheet, r), fh, indent=2)
+                os.replace(dst + ".uploading", dst)
+                queued.append(r["order_id"])
+        self.event("info", "Scenarios queued from %s: %d order(s)%s" % (
+            sheet["title"], len(queued), ", %d already waiting" % len(skipped) if skipped else ""))
+        return {"queued": queued, "skipped": skipped, "drawing_test": sheet["title"]}
 
     def requeue(self, folder, name):
         if folder not in ("done", "failed"):
@@ -796,6 +919,10 @@ def route(h, method, path, q, body):
             return h.addin("/api/hub/projects?hub=" + urllib.request.quote(q.get("hub", ""), safe=""), timeout=120)
         if path == "/api/hub/folder":
             return h.addin("/api/hub/folder?id=" + urllib.request.quote(q.get("id", ""), safe=""), timeout=120)
+        if path == "/api/scenarios":
+            return h.scenario_sheets()
+        if path == "/api/scenarios/rows":
+            return h.scenario_rows(q.get("sheet", ""))
         if path == "/api/model/params":
             return h.addin("/api/model/params?id=" + urllib.request.quote(q.get("id", ""), safe=""), timeout=320)
         raise HttpError(404, "no such endpoint")
@@ -810,6 +937,10 @@ def route(h, method, path, q, body):
             return h.preview(body.get("content"))
         if path == "/api/orders/upload":
             return h.upload(body.get("name"), body.get("content"))
+        if path == "/api/scenarios/upload":
+            return h.scenario_upload(body.get("name"), body.get("content"))
+        if path == "/api/scenarios/generate":
+            return h.scenario_generate(body.get("sheet"), body.get("mode"), body.get("selection"))
         if path == "/api/orders/requeue":
             return h.requeue(body.get("folder"), body.get("name", ""))
         if path == "/api/orders/remove":

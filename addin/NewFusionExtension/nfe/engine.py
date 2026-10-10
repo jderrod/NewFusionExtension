@@ -150,6 +150,7 @@ class Engine(object):
         self._model_cache = collections.OrderedDict()   # model lineage id -> doc
         self._opened_models = {}                       # id -> doc for cache size 0
         self._saved_versions = {}                      # model id -> last version we saved
+        self._saved_at = {}                            # model id -> clock time that save completed
         self._since_recycle = 0
         self._inbox_hint = False
         self._cancel_order = False
@@ -540,6 +541,16 @@ class Engine(object):
 
         # 2. parameters
         self._step(res, "apply_parameters")
+        # Changing a model again while Fusion is still finishing its previous
+        # upload can leave the file reserved in the cloud (the next upload is
+        # then refused with a misleading "insufficient permissions" error).
+        settle = float(P.get("model_settle_s", 0) or 0)
+        saved_at = self._saved_at.get(model_ref.get("id"))
+        if settle > 0 and saved_at is not None:
+            remaining = saved_at + settle - self.clock()
+            if remaining > 0:
+                self._publish(component=dict(self.state.get("component") or {}, waiting_for="model settle"))
+                yield Sleep(remaining)
         model_params = ops.read_params(model)
         values = dict(comp.params)
         transformed = _apply_input_transforms(values, comp.type, cfg.get("orders", {}).get("input_transforms"))
@@ -551,7 +562,8 @@ class Engine(object):
                                                 type=comp.type, series_id=comp.series_id)
                 except (KeyError, IndexError, ValueError) as e:
                     raise ComponentError("bad derived parameter template %s: %s" % (pname, e))
-                values[pname] = ParamValue(text, "string")
+                if text:
+                    values[pname] = ParamValue(text, "string")
         assignments, unknown, errors = plan_assignments(values, model_params, optional=tuple(derived) + tuple(transformed),
                                                     null_policy=P.get("null_policy", "zero"))
         nulls = [n for n, _, pv in assignments if pv.value is None]
@@ -565,6 +577,10 @@ class Engine(object):
             if P.get("unknown_parameter_policy") == "fail":
                 raise ComponentError(msg)
             res["warnings"].append(msg)
+        for group in cfg.get("orders", {}).get("tag_parameters") or []:
+            if not any(n in model_params for n in group):
+                res["warnings"].append("model %s has no tag parameter %s" % (
+                    model_ref.get("name"), " / ".join(group)))
         applied = ops.apply_params(model, [(n, e) for n, e, _ in assignments])
         res["parameters"] = applied
         bad = [a for a in applied if not a.get("ok")]
@@ -586,6 +602,7 @@ class Engine(object):
             if token is not None:
                 yield self._wait(lambda: ops.save_complete(model, token),
                                  P.get("save_timeout_s", 300), "model cloud save", res)
+                self._saved_at[model_ref.get("id")] = self.clock()
             else:
                 res["warnings"].append("model unchanged; no new version saved")
         res["model_version"] = ops.doc_version(model)
@@ -868,6 +885,21 @@ class Engine(object):
                 self.state.event("warn", "Drop copy to %s failed: %s" % (drops["drilling"], e))
         if copied:
             outputs["dropped"] = copied
+        if order.drawing_test:
+            from .orders import safe_name
+            dest = os.path.join(self.paths.root, "drawing_test", safe_name(order.drawing_test))
+            collected = []
+            for c, _ in plan:
+                rel = (results.get(c.id) or {}).get("pdf")
+                if rel:
+                    try:
+                        os.makedirs(dest, exist_ok=True)
+                        shutil.copy2(os.path.join(self.paths.output, rel), dest)
+                        collected.append(os.path.join(dest, os.path.basename(rel)))
+                    except OSError as e:
+                        self.state.event("warn", "Drawing test copy to %s failed: %s" % (dest, e))
+            if collected:
+                outputs["drawing_test"] = collected
         return outputs
 
     def _wait_until_ready(self):

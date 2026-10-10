@@ -4,7 +4,8 @@ A Fusion add-in that watches a dropbox folder for order JSON files. For every
 component in an order (D1, S2, P5, … any number of each) it:
 
 1. opens the model chosen for the component's series (e.g. `3X8X_Door`)
-2. applies the order's parameters
+2. applies the order's parameters and the tags (component id `1-D1-<order>`,
+   order number, series)
 3. **saves the model** and waits until the new cloud version is complete
 4. computes the Gannomat **drilling** records (doors, stiles)
 5. picks the component's **toolpaths** from the toolpath tables (3X8X doors,
@@ -34,7 +35,10 @@ NewFusionExtension/
     NewFusionExtension.py     stable entry point: custom event + ticker thread
     nfe/                      engine, Fusion adapter, control API, shared code
   harness/server.py           dashboard + supervisor (standard-library Python)
+  harness/scenarios.py        validation-scenario sheets -> orders (Scenarios tab)
   harness/static/             dashboard page
+  scenarios/                  validation-scenario sheets (CSV)
+  drawing_test/<sheet>/       drawing PDFs of the scenario orders, one folder per sheet
   config/config.json          shared configuration (edit from the dashboard)
   dropbox/inbox               drop orders here
   dropbox/processing          order being worked on + checkpoint
@@ -101,7 +105,8 @@ Current rules (from the hub's naming convention):
 * Floats get the model parameter's unit (`88.5625 in`); bools become `1`/`0`;
   text parameters are quoted.
 * `series_id` selects the model; it is only written if the model has it.
-* `a_order_number` is filled with the order id (`orders.derived_parameters`).
+* The tags are filled from the order (`orders.derived_parameters`): order number
+  = order id, `component_id` = `1-<component>-<order id>`, series = `series_id`.
 * JSON `null` → written as 0 / empty by default (`processing.null_policy`:
   `zero` | `skip` | `fail`). Leaving the old value would leak the previous
   component's value, because models are reused.

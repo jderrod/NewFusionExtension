@@ -126,6 +126,67 @@ def terminate(pid):
         _k32.CloseHandle(h)
 
 
+def list_windows(pid):
+    """Visible top-level windows of a process:
+    [{"hwnd", "title", "class", "enabled", "width", "height"}]"""
+    if not IS_WINDOWS:
+        return []
+    u32 = ctypes.WinDLL("user32", use_last_error=True)
+    out = []
+    proto = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+    def each(hwnd, _):
+        owner = wintypes.DWORD()
+        u32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
+        if owner.value == pid and u32.IsWindowVisible(hwnd):
+            title = ctypes.create_unicode_buffer(300)
+            cls = ctypes.create_unicode_buffer(100)
+            u32.GetWindowTextW(hwnd, title, 300)
+            u32.GetClassNameW(hwnd, cls, 100)
+            rect = wintypes.RECT()
+            u32.GetWindowRect(hwnd, ctypes.byref(rect))
+            out.append({"hwnd": hwnd, "title": title.value, "class": cls.value,
+                        "enabled": bool(u32.IsWindowEnabled(hwnd)),
+                        "width": rect.right - rect.left, "height": rect.bottom - rect.top})
+        return True
+
+    u32.EnumWindows(proto(each), 0)
+    return out
+
+
+def modal_dialog(pid):
+    """The dialog that is blocking a Qt application: its main window (the
+    largest one) is disabled and another window is enabled.  None otherwise."""
+    wins = [w for w in list_windows(pid) if "QWindowIcon" in w["class"]]
+    if len(wins) < 2:
+        return None
+    main = max(wins, key=lambda w: w["width"] * w["height"])
+    if main["enabled"]:
+        return None
+    dialogs = [w for w in wins if w is not main and w["enabled"]]
+    return dialogs[0] if dialogs else None
+
+
+def close_window(hwnd):
+    """Same as the window's X button."""
+    if not IS_WINDOWS:
+        return False
+    return bool(ctypes.WinDLL("user32").PostMessageW(hwnd, 0x0010, 0, 0))       # WM_CLOSE
+
+
+def click_window(hwnd, x, y):
+    """Left click at client coordinates, without moving the real mouse."""
+    if not IS_WINDOWS:
+        return False
+    post = ctypes.WinDLL("user32").PostMessageW
+    pos = (int(y) << 16) | (int(x) & 0xFFFF)
+    post(hwnd, 0x0200, 0, pos)            # WM_MOUSEMOVE
+    time.sleep(0.2)
+    post(hwnd, 0x0201, 1, pos)            # WM_LBUTTONDOWN
+    time.sleep(0.1)
+    return bool(post(hwnd, 0x0202, 0, pos))   # WM_LBUTTONUP
+
+
 def wait_for_exit(pid, timeout):
     end = time.time() + timeout
     while time.time() < end:

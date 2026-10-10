@@ -19,3 +19,7 @@ config/toolpath_profiles.json
 .idea/
 Thumbs.db
 desktop.ini
+
+# Scenario sheets and collected test drawings (order data)
+scenarios/
+drawing_test/

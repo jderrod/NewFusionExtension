@@ -32,7 +32,14 @@ DEFAULTS = {
         "group_by_model": True,
         # Parameters filled from the order itself (applied only when the model
         # has them).  Placeholders: {order_id} {component_id} {type} {series_id}
-        "derived_parameters": {"a_order_number": "{order_id}"},
+        # A value that comes out empty is not written.  The 2X stile models
+        # say "order_number" / "series" where the others have an "a_" prefix.
+        "derived_parameters": {"a_order_number": "{order_id}", "order_number": "{order_id}",
+                               "component_id": "1-{component_id}-{order_id}",
+                               "a_series": "{series_id}", "series": "{series_id}"},
+        # Tags every model is expected to carry: a warning is reported when a
+        # model has none of the names in a group.
+        "tag_parameters": [["component_id"], ["a_order_number", "order_number"], ["a_series", "series"]],
         # Order values reshaped before they are applied.  split_text: the panel
         # "cutout" value "B-354 & B-386" -> cutout_A='B-354', cutout_B='B-386'
         # (old pipeline behaviour; '+' accepted as separator too).
@@ -105,6 +112,9 @@ DEFAULTS = {
         "save_timeout_s": 300,
         "drawing_update_timeout_s": 180,
         "drawing_settle_s": 2.0,
+        # Minimum time between a model's cloud save completing and the next
+        # change to that same model (0 = no wait).  See ARCHITECTURE.md 12.5.
+        "model_settle_s": 20.0,
         "export_timeout_s": 300,
         "step_stuck_timeout_s": 900,    # harness treats a longer blocking step as a hang
     },
@@ -121,6 +131,16 @@ DEFAULTS = {
         "heartbeat_stale_s": 60,
         "restart_cooldown_s": 300,
         "fusion_launcher": "",          # blank = auto-detect FusionLauncher.exe
+        # Dialogs that freeze Fusion until somebody clicks.  The harness answers
+        # the ones listed here: "close" = the X button, "click" = a button at
+        # x, y given as fractions of the dialog's width and height.
+        "dismiss_dialogs": True,
+        "dialog_actions": [
+            # cloud upload refused: "Open" (never "Save As", which creates a copy)
+            {"title": "Upload Error", "action": "click", "x": 0.912, "y": 0.8125},
+            # "Recovered Documents" after a restart with unsaved changes
+            {"title": "Fusion360", "action": "close"},
+        ],
     },
     "api": {
         "addin_port": 8766,

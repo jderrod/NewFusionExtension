@@ -180,8 +180,17 @@
     },
     "group_by_model": true,
     "derived_parameters": {
-      "a_order_number": "{order_id}"
+      "a_order_number": "{order_id}",
+      "order_number": "{order_id}",
+      "component_id": "1-{component_id}-{order_id}",
+      "a_series": "{series_id}",
+      "series": "{series_id}"
     },
+    "tag_parameters": [
+      ["component_id"],
+      ["a_order_number", "order_number"],
+      ["a_series", "series"]
+    ],
     "input_transforms": [
       {
         "type": "split_text",
@@ -262,6 +271,7 @@
     "save_timeout_s": 300,
     "drawing_update_timeout_s": 180,
     "drawing_settle_s": 2.0,
+    "model_settle_s": 20.0,
     "export_timeout_s": 300,
     "step_stuck_timeout_s": 900
   },
