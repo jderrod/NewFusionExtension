@@ -1,0 +1,41 @@
+{
+  "2X86-0057": {
+    "unit": "in",
+    "description": "Compiled paired drilling coordinates for all components organized by type",
+    "doors": [],
+    "panels": [],
+    "stiles": [
+      {
+        "component_id": "S1",
+        "coordinates": [
+          {
+            "ProgramName": "1-S1-2X86-0057",
+            "WorkStop": 1,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:21:53",
+            "DrillName": "NO DRILLING REQUIRED"
+          },
+          {
+            "ProgramName": "1-S1-2X86-0057",
+            "WorkStop": 4,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:21:53",
+            "DrillName": "NO DRILLING REQUIRED"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,329 @@
+{
+  "order_id": "2X88-0103",
+  "source_file": "2X88-0103.json",
+  "started_at": 1791480484.4150152,
+  "finished_at": 1791480510.559021,
+  "duration_s": 26.1,
+  "summary": {
+    "status": "ok",
+    "total": 1,
+    "done": 1,
+    "failed": 0,
+    "warnings": 0,
+    "order_id": "2X88-0103",
+    "output_dir": "2X88-0103 Oct 8 2026 - 1028"
+  },
+  "components": [
+    {
+      "id": "S1",
+      "type": "stile",
+      "series_id": "2X88",
+      "rule_id": "2x86-8-stile",
+      "model": "2X86/8_Stile",
+      "drawing": "2X86/8_Stile Drawing",
+      "status": "done",
+      "error": null,
+      "warnings": [],
+      "parameters": [
+        {
+          "name": "component_height",
+          "ok": true,
+          "expression": "94.875 in",
+          "before": "83.0625 in",
+          "after": "94.875 in"
+        },
+        {
+          "name": "component_width",
+          "ok": true,
+          "expression": "6 in",
+          "before": "10 in",
+          "after": "6 in"
+        },
+        {
+          "name": "LD_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "71.75 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "LD_floor_clearance",
+          "ok": true,
+          "expression": "9.25 in",
+          "before": "12 in",
+          "after": "9.25 in"
+        },
+        {
+          "name": "RD_height",
+          "ok": true,
+          "expression": "76.5 in",
+          "before": "74.75 in",
+          "after": "76.5 in"
+        },
+        {
+          "name": "RD_floor_clearance",
+          "ok": true,
+          "expression": "4.5 in",
+          "before": "9 in",
+          "after": "4.5 in"
+        },
+        {
+          "name": "ceiling_hung",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "stile_gapping",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "continuous_hardware",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "left_side_door",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "LD_hinging_right",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "LD_swinging_out",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "right_side_door",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "RD_hinging_right",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "RD_swinging_out",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "order_number",
+          "ok": true,
+          "expression": "'2X88-0103'",
+          "before": "'2X88-0102'",
+          "after": "'2X88-0103'"
+        },
+        {
+          "name": "component_id",
+          "ok": true,
+          "expression": "'1-S1-2X88-0103'",
+          "before": "'1-S1-2X88-0102'",
+          "after": "'1-S1-2X88-0103'"
+        },
+        {
+          "name": "series",
+          "ok": true,
+          "expression": "'2X88'",
+          "before": "'2X88'",
+          "after": "'2X88'"
+        }
+      ],
+      "unknown_parameters": [],
+      "model_version": 134,
+      "pdf": "2X88-0103 Oct 8 2026 - 1028/1-S1-2X88-0103-drawing.pdf",
+      "pdf_bytes": 267207,
+      "steps": [
+        {
+          "name": "open_model",
+          "started_at": 1791480484.4183462,
+          "duration_s": 0.0
+        },
+        {
+          "name": "apply_parameters",
+          "started_at": 1791480484.4192598,
+          "duration_s": 9.06
+        },
+        {
+          "name": "save_model",
+          "started_at": 1791480493.4791417,
+          "duration_s": 5.72
+        },
+        {
+          "name": "drilling",
+          "started_at": 1791480499.1977854,
+          "duration_s": 0.0
+        },
+        {
+          "name": "open_drawing",
+          "started_at": 1791480499.2002466,
+          "duration_s": 7.52
+        },
+        {
+          "name": "update_drawing",
+          "started_at": 1791480506.716924,
+          "duration_s": 2.59
+        },
+        {
+          "name": "export_pdf",
+          "started_at": 1791480509.307027,
+          "duration_s": 0.23
+        },
+        {
+          "name": "cleanup",
+          "started_at": 1791480509.535419,
+          "duration_s": 1.02
+        }
+      ],
+      "started_at": 1791480484.4180596,
+      "finished_at": 1791480510.5569828,
+      "duration_s": 26.1,
+      "drilling": {
+        "component_id": "S1",
+        "order_id": "2X88-0103",
+        "unit": "in",
+        "description": "Paired drilling coordinates (X, Y)",
+        "coordinates": [
+          {
+            "ProgramName": "1-S1-2X88-0103",
+            "WorkStop": 1,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-08 10:28:19",
+            "DrillName": "NO DRILLING REQUIRED"
+          },
+          {
+            "ProgramName": "1-S1-2X88-0103",
+            "WorkStop": 4,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-08 10:28:19",
+            "DrillName": "NO DRILLING REQUIRED"
+          }
+        ],
+        "summary": {
+          "type": "stile",
+          "source": "order parameters",
+          "series_id": "2X88",
+          "series_normalized": "",
+          "drilling_flags": {
+            "left_interior_drilling": 0,
+            "left_exterior_drilling": 0,
+            "right_interior_drilling": 0,
+            "right_exterior_drilling": 1
+          },
+          "sides": {
+            "left": {
+              "door": false,
+              "drilled": false,
+              "workstop": null,
+              "flip_rotate": null
+            },
+            "right": {
+              "door": true,
+              "drilled": true,
+              "workstop": 1,
+              "flip_rotate": 1
+            }
+          },
+          "x_offset": 0,
+          "hole_count": 0,
+          "air_drill_added": true,
+          "air_drill_reason": "no hole parameters found: air drilling on both workstops",
+          "result": "no holes found",
+          "position_y": 0.985,
+          "workstops": [
+            1,
+            4
+          ],
+          "flip_rotate": [
+            1
+          ],
+          "drill_names": [
+            "NO DRILLING REQUIRED"
+          ],
+          "record_count": 2
+        }
+      },
+      "toolpaths": {
+        "profile": null,
+        "result": "no toolpath table for this component"
+      },
+      "drawing_references": {
+        "before": [
+          {
+            "name": "2X86/8_Stile",
+            "id": "urn:adsk.wipprod:dm.lineage:3yRqT52LQzW_Zhqsvx8loA",
+            "version": 1,
+            "file_version": 1,
+            "latest": 134,
+            "out_of_date": true
+          }
+        ],
+        "after": [
+          {
+            "name": "2X86/8_Stile",
+            "id": "urn:adsk.wipprod:dm.lineage:3yRqT52LQzW_Zhqsvx8loA",
+            "version": 134,
+            "file_version": 134,
+            "latest": 134,
+            "out_of_date": false
+          }
+        ],
+        "updated": true
+      },
+      "health_after": {
+        "threads": 590,
+        "working_set_mb": 2736.5,
+        "handles": 7953,
+        "documents": 1,
+        "at": 1791480510.5559435
+      },
+      "attempts": 1
+    }
+  ],
+  "outputs": {
+    "folder": "2X88-0103 Oct 8 2026 - 1028",
+    "drilling": "2X88-0103 Oct 8 2026 - 1028/2X88-0103.json",
+    "drilling_components": 1,
+    "dropped": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\machine_drops/gannomat\\2X88-0103.json"
+    ],
+    "drawing_test": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\drawing_test\\2X86_and_2X88_Stile\\1-S1-2X88-0103-drawing.pdf"
+    ]
+  }
+}

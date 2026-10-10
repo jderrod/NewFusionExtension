@@ -1,0 +1,274 @@
+{
+  "order_id": "2X8X-0028",
+  "source_file": "2X8X-0028.json",
+  "started_at": 1791406277.9178076,
+  "finished_at": 1791406296.3653936,
+  "duration_s": 18.4,
+  "summary": {
+    "status": "ok",
+    "total": 1,
+    "done": 1,
+    "failed": 0,
+    "warnings": 0,
+    "order_id": "2X8X-0028",
+    "output_dir": "2X8X-0028 Oct 7 2026 - 1351"
+  },
+  "components": [
+    {
+      "id": "D1",
+      "type": "door",
+      "series_id": "2X8XG",
+      "rule_id": "2x8x-door",
+      "model": "2X8X_Door",
+      "drawing": "2X8X_Door Drawing",
+      "status": "done",
+      "error": null,
+      "warnings": [],
+      "parameters": [
+        {
+          "name": "component_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "71.75 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "component_width",
+          "ok": true,
+          "expression": "25.0625 in",
+          "before": "34.6875 in",
+          "after": "25.0625 in"
+        },
+        {
+          "name": "component_floor_clearance",
+          "ok": true,
+          "expression": "9 in",
+          "before": "9 in",
+          "after": "9 in"
+        },
+        {
+          "name": "door_gapping",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "continuous_hardware",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "occupancy_indicator_latch",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "door_hinging_right",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "door_swinging_out",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "door_wall_keep_latching",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "door_perp_stile_keeper",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "a_order_number",
+          "ok": true,
+          "expression": "'2X8X-0028'",
+          "before": "'2X8X-0027'",
+          "after": "'2X8X-0028'"
+        },
+        {
+          "name": "component_id",
+          "ok": true,
+          "expression": "'1-D1-2X8X-0028'",
+          "before": "'1-D1-2X8X-0027'",
+          "after": "'1-D1-2X8X-0028'"
+        },
+        {
+          "name": "a_series",
+          "ok": true,
+          "expression": "'2X8XG'",
+          "before": "'2X8XG'",
+          "after": "'2X8XG'"
+        }
+      ],
+      "unknown_parameters": [],
+      "model_version": 273,
+      "pdf": "2X8X-0028 Oct 7 2026 - 1351/1-D1-2X8X-0028-drawing.pdf",
+      "pdf_bytes": 260469,
+      "steps": [
+        {
+          "name": "open_model",
+          "started_at": 1791406277.9243886,
+          "duration_s": 0.0
+        },
+        {
+          "name": "apply_parameters",
+          "started_at": 1791406277.9266956,
+          "duration_s": 1.39
+        },
+        {
+          "name": "save_model",
+          "started_at": 1791406279.3176427,
+          "duration_s": 4.37
+        },
+        {
+          "name": "drilling",
+          "started_at": 1791406283.6860144,
+          "duration_s": 0.0
+        },
+        {
+          "name": "open_drawing",
+          "started_at": 1791406283.6897774,
+          "duration_s": 7.74
+        },
+        {
+          "name": "update_drawing",
+          "started_at": 1791406291.4329722,
+          "duration_s": 2.78
+        },
+        {
+          "name": "export_pdf",
+          "started_at": 1791406294.2151263,
+          "duration_s": 0.54
+        },
+        {
+          "name": "cleanup",
+          "started_at": 1791406294.752636,
+          "duration_s": 1.6
+        }
+      ],
+      "started_at": 1791406277.92368,
+      "finished_at": 1791406296.3562376,
+      "duration_s": 18.4,
+      "drilling": {
+        "component_id": "D1",
+        "order_id": "2X8X-0028",
+        "unit": "in",
+        "description": "Paired drilling coordinates (X, Y)",
+        "coordinates": [
+          {
+            "ProgramName": "1-D1-2X8X-0028",
+            "WorkStop": 1,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:51:23",
+            "DrillName": "NO DRILLING REQUIRED"
+          },
+          {
+            "ProgramName": "1-D1-2X8X-0028",
+            "WorkStop": 4,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:51:23",
+            "DrillName": "NO DRILLING REQUIRED"
+          }
+        ],
+        "summary": {
+          "type": "door",
+          "source": "order parameters",
+          "series_id": "2X8XG",
+          "series_normalized": "",
+          "x_offset": 0,
+          "hole_count": 0,
+          "air_drill_added": true,
+          "air_drill_reason": "no hole parameters found: air drilling on both workstops",
+          "result": "no holes found",
+          "position_y": 0.968,
+          "workstops": [
+            1,
+            4
+          ],
+          "flip_rotate": [
+            1
+          ],
+          "drill_names": [
+            "NO DRILLING REQUIRED"
+          ],
+          "record_count": 2
+        }
+      },
+      "toolpaths": {
+        "profile": null,
+        "result": "no toolpath table for this component"
+      },
+      "drawing_references": {
+        "before": [
+          {
+            "name": "2X8X_Door",
+            "id": "urn:adsk.wipprod:dm.lineage:7rcXJNbXSfC-ACOlo_mWvA",
+            "version": 65,
+            "file_version": 65,
+            "latest": 273,
+            "out_of_date": true
+          }
+        ],
+        "after": [
+          {
+            "name": "2X8X_Door",
+            "id": "urn:adsk.wipprod:dm.lineage:7rcXJNbXSfC-ACOlo_mWvA",
+            "version": 273,
+            "file_version": 273,
+            "latest": 273,
+            "out_of_date": false
+          }
+        ],
+        "updated": true
+      },
+      "health_after": {
+        "threads": 588,
+        "working_set_mb": 2584.3,
+        "handles": 8083,
+        "documents": 1,
+        "at": 1791406296.3515239
+      },
+      "attempts": 1
+    }
+  ],
+  "outputs": {
+    "folder": "2X8X-0028 Oct 7 2026 - 1351",
+    "drilling": "2X8X-0028 Oct 7 2026 - 1351/2X8X-0028.json",
+    "drilling_components": 1,
+    "dropped": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\machine_drops/gannomat\\2X8X-0028.json"
+    ],
+    "drawing_test": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\drawing_test\\2X8X_Door\\1-D1-2X8X-0028-drawing.pdf"
+    ]
+  }
+}

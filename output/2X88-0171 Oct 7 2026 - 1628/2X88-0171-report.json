@@ -1,0 +1,197 @@
+{
+  "order_id": "2X88-0171",
+  "source_file": "2X88-0171.json",
+  "started_at": 1791415728.5242355,
+  "finished_at": 1791416030.4829764,
+  "duration_s": 302.0,
+  "summary": {
+    "status": "failed",
+    "total": 1,
+    "done": 0,
+    "failed": 1,
+    "warnings": 0,
+    "order_id": "2X88-0171",
+    "output_dir": "2X88-0171 Oct 7 2026 - 1628"
+  },
+  "components": [
+    {
+      "id": "S1",
+      "type": "stile",
+      "series_id": "2X88G",
+      "rule_id": "2x86-8-stile",
+      "model": "2X86/8_Stile",
+      "drawing": "2X86/8_Stile Drawing",
+      "status": "failed",
+      "error": "timed out after 300s waiting for model cloud save",
+      "warnings": [],
+      "parameters": [
+        {
+          "name": "component_height",
+          "ok": true,
+          "expression": "110.875 in",
+          "before": "108.4375 in",
+          "after": "110.875 in"
+        },
+        {
+          "name": "component_width",
+          "ok": true,
+          "expression": "4 in",
+          "before": "10 in",
+          "after": "4 in"
+        },
+        {
+          "name": "LD_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "71.75 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "LD_floor_clearance",
+          "ok": true,
+          "expression": "9 in",
+          "before": "9 in",
+          "after": "9 in"
+        },
+        {
+          "name": "RD_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "75.875 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "RD_floor_clearance",
+          "ok": true,
+          "expression": "5.875 in",
+          "before": "4.875 in",
+          "after": "5.875 in"
+        },
+        {
+          "name": "ceiling_hung",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "stile_gapping",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "continuous_hardware",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "left_side_door",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "LD_hinging_right",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "LD_swinging_out",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "right_side_door",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "RD_hinging_right",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "RD_swinging_out",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "order_number",
+          "ok": true,
+          "expression": "'2X88-0171'",
+          "before": "'2X88-0163'",
+          "after": "'2X88-0171'"
+        },
+        {
+          "name": "component_id",
+          "ok": true,
+          "expression": "'1-S1-2X88-0171'",
+          "before": "'1-S1-2X88-0163'",
+          "after": "'1-S1-2X88-0171'"
+        },
+        {
+          "name": "series",
+          "ok": true,
+          "expression": "'2X88G'",
+          "before": "'2X88G'",
+          "after": "'2X88G'"
+        }
+      ],
+      "unknown_parameters": [],
+      "model_version": null,
+      "pdf": null,
+      "pdf_bytes": null,
+      "steps": [
+        {
+          "name": "open_model",
+          "started_at": 1791415728.528292,
+          "duration_s": 0.0
+        },
+        {
+          "name": "apply_parameters",
+          "started_at": 1791415728.5292096,
+          "duration_s": 1.14
+        },
+        {
+          "name": "save_model",
+          "started_at": 1791415729.6684,
+          "duration_s": 300.53
+        },
+        {
+          "name": "cleanup",
+          "started_at": 1791416030.1934743,
+          "duration_s": 0.29
+        }
+      ],
+      "started_at": 1791415728.5280292,
+      "finished_at": 1791416030.4801517,
+      "duration_s": 302.0,
+      "health_after": {
+        "threads": 515,
+        "working_set_mb": 2729.5,
+        "handles": 7429,
+        "documents": 1,
+        "at": 1791416030.478996
+      },
+      "attempts": 1
+    }
+  ],
+  "outputs": {
+    "folder": "2X88-0171 Oct 7 2026 - 1628"
+  }
+}

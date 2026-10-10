@@ -20,6 +20,5 @@ config/toolpath_profiles.json
 Thumbs.db
 desktop.ini
 
-# Scenario sheets and collected test drawings (order data)
-scenarios/
-drawing_test/
+# Kept in the repo: scenarios/, drawing_test/ and the output/2X8* folders of
+# the 2026-10 validation run (added with git add -f)

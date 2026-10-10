@@ -1,0 +1,302 @@
+{
+  "order_id": "2X82-0082",
+  "source_file": "2X82-0082.json",
+  "started_at": 1791403727.3757463,
+  "finished_at": 1791403743.9614797,
+  "duration_s": 16.6,
+  "summary": {
+    "status": "ok",
+    "total": 1,
+    "done": 1,
+    "failed": 0,
+    "warnings": 1,
+    "order_id": "2X82-0082",
+    "output_dir": "2X82-0082 Oct 7 2026 - 1308"
+  },
+  "components": [
+    {
+      "id": "S1",
+      "type": "stile",
+      "series_id": "2X82G",
+      "rule_id": "2x81-2-stile",
+      "model": "2X81/2_Stile",
+      "drawing": "2X81/2_Stile Drawing",
+      "status": "done",
+      "error": null,
+      "warnings": [
+        "timeline warning at routing_right: Profile 1 missing<b>1 Reference Failures</b><br/>The profile reference is lost and this feature is using cached geometry.<br/>Edit this feature and select new profile references.routing_right"
+      ],
+      "parameters": [
+        {
+          "name": "component_height",
+          "ok": true,
+          "expression": "116.875 in",
+          "before": "97.125 in",
+          "after": "116.875 in"
+        },
+        {
+          "name": "component_width",
+          "ok": true,
+          "expression": "3 in",
+          "before": "18 in",
+          "after": "3 in"
+        },
+        {
+          "name": "LD_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "55.8125 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "LD_floor_clearance",
+          "ok": true,
+          "expression": "12 in",
+          "before": "4.5 in",
+          "after": "12 in"
+        },
+        {
+          "name": "RD_height",
+          "ok": true,
+          "expression": "71.75 in",
+          "before": "55.8125 in",
+          "after": "71.75 in"
+        },
+        {
+          "name": "RD_floor_clearance",
+          "ok": true,
+          "expression": "4.5 in",
+          "before": "4.5 in",
+          "after": "4.5 in"
+        },
+        {
+          "name": "floor_anchored",
+          "ok": true,
+          "expression": "0",
+          "before": "0",
+          "after": "0"
+        },
+        {
+          "name": "stile_gapping",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "continuous_hardware",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "left_side_door",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "LD_hinging_right",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "LD_swinging_out",
+          "ok": true,
+          "expression": "0",
+          "before": "1",
+          "after": "0"
+        },
+        {
+          "name": "right_side_door",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "RD_hinging_right",
+          "ok": true,
+          "expression": "1",
+          "before": "1",
+          "after": "1"
+        },
+        {
+          "name": "RD_swinging_out",
+          "ok": true,
+          "expression": "1",
+          "before": "0",
+          "after": "1"
+        },
+        {
+          "name": "order_number",
+          "ok": true,
+          "expression": "'2X82-0082'",
+          "before": "'2X82-0073'",
+          "after": "'2X82-0082'"
+        },
+        {
+          "name": "component_id",
+          "ok": true,
+          "expression": "'1-S1-2X82-0082'",
+          "before": "'1-S1-2X82-0073'",
+          "after": "'1-S1-2X82-0082'"
+        },
+        {
+          "name": "series",
+          "ok": true,
+          "expression": "'2X82G'",
+          "before": "'2X82G'",
+          "after": "'2X82G'"
+        }
+      ],
+      "unknown_parameters": [],
+      "model_version": 108,
+      "pdf": "2X82-0082 Oct 7 2026 - 1308/1-S1-2X82-0082-drawing.pdf",
+      "pdf_bytes": 266224,
+      "steps": [
+        {
+          "name": "open_model",
+          "started_at": 1791403727.3819723,
+          "duration_s": 0.0
+        },
+        {
+          "name": "apply_parameters",
+          "started_at": 1791403727.3844752,
+          "duration_s": 1.35
+        },
+        {
+          "name": "save_model",
+          "started_at": 1791403728.7341003,
+          "duration_s": 3.21
+        },
+        {
+          "name": "drilling",
+          "started_at": 1791403731.9397812,
+          "duration_s": 0.0
+        },
+        {
+          "name": "open_drawing",
+          "started_at": 1791403731.9429781,
+          "duration_s": 7.52
+        },
+        {
+          "name": "update_drawing",
+          "started_at": 1791403739.4584925,
+          "duration_s": 2.78
+        },
+        {
+          "name": "export_pdf",
+          "started_at": 1791403742.2430959,
+          "duration_s": 0.53
+        },
+        {
+          "name": "cleanup",
+          "started_at": 1791403742.77345,
+          "duration_s": 1.18
+        }
+      ],
+      "started_at": 1791403727.3814862,
+      "finished_at": 1791403743.9571767,
+      "duration_s": 16.6,
+      "drilling": {
+        "component_id": "S1",
+        "order_id": "2X82-0082",
+        "unit": "in",
+        "description": "No drilling required",
+        "coordinates": [
+          {
+            "ProgramName": "1-S1-2X82-0082",
+            "WorkStop": 1,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:08:51",
+            "DrillName": "NO DRILLING REQUIRED"
+          },
+          {
+            "ProgramName": "1-S1-2X82-0082",
+            "WorkStop": 4,
+            "PositionX": 121,
+            "PositionY": 0.197,
+            "PositionZ": null,
+            "Function": 4,
+            "ToolDM": 1,
+            "FlipRotate": 1,
+            "SSMA_TimeStamp": null,
+            "Fusion_TimeStamp": "2026-10-07 13:08:51",
+            "DrillName": "NO DRILLING REQUIRED"
+          }
+        ],
+        "summary": {
+          "result": "fallback",
+          "reason": "No drilling required for S1 (no door hinges onto stile)",
+          "hole_count": 0,
+          "workstops": [
+            1,
+            4
+          ],
+          "flip_rotate": [
+            1
+          ],
+          "air_drill_added": true,
+          "air_drill_reason": "fallback: air drilling on both workstops"
+        }
+      },
+      "toolpaths": {
+        "profile": null,
+        "result": "no toolpath table for this component"
+      },
+      "drawing_references": {
+        "before": [
+          {
+            "name": "2X81/2_Stile",
+            "id": "urn:adsk.wipprod:dm.lineage:cuxlckWNQCCSx71SaO4O7g",
+            "version": 11,
+            "file_version": 11,
+            "latest": 108,
+            "out_of_date": true
+          }
+        ],
+        "after": [
+          {
+            "name": "2X81/2_Stile",
+            "id": "urn:adsk.wipprod:dm.lineage:cuxlckWNQCCSx71SaO4O7g",
+            "version": 108,
+            "file_version": 108,
+            "latest": 108,
+            "out_of_date": false
+          }
+        ],
+        "updated": true
+      },
+      "health_after": {
+        "threads": 574,
+        "working_set_mb": 2840.9,
+        "handles": 7537,
+        "documents": 1,
+        "at": 1791403743.9551497
+      },
+      "attempts": 1
+    }
+  ],
+  "outputs": {
+    "folder": "2X82-0082 Oct 7 2026 - 1308",
+    "drilling": "2X82-0082 Oct 7 2026 - 1308/2X82-0082.json",
+    "drilling_components": 1,
+    "dropped": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\machine_drops/gannomat\\2X82-0082.json"
+    ],
+    "drawing_test": [
+      "C:\\Users\\jderr\\OneDrive\\Desktop\\NewFusionExtension\\drawing_test\\2X81_and_2X82_Stile\\1-S1-2X82-0082-drawing.pdf"
+    ]
+  }
+}
